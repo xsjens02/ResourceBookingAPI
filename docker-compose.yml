@@ -1,0 +1,20 @@
+﻿services:
+    mongohost:              
+        image: mongo:7     
+        restart: always    
+        container_name: resourcebookingmongodb
+        volumes:
+         - dbdata:/data/db
+        ports:
+        - 27017:27017
+      
+    web:
+        build: .        
+        restart: always
+        container_name: resourcebookingwebapi
+        ports:
+          - 5000:8080 
+        depends_on:     
+          - mongohost
+volumes:                
+  dbdata: 

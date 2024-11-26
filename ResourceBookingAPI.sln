@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResourceBookingAPI", "ResourceBookingAPI.csproj", "{F898E118-2A66-4F7F-885F-5B190D80E622}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F898E118-2A66-4F7F-885F-5B190D80E622}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F898E118-2A66-4F7F-885F-5B190D80E622}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F898E118-2A66-4F7F-885F-5B190D80E622}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F898E118-2A66-4F7F-885F-5B190D80E622}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7F1B17E7-0306-4BB0-B6DC-1E2F4FDA79C5}
+	EndGlobalSection
+EndGlobal
