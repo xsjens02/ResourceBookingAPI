@@ -79,6 +79,9 @@ namespace ResourceBookingAPI
 
             //Configure middleware
             app.UseHttpsRedirection();
+
+            app.UseCors("AllowReactApp");
+
             app.UseAuthentication();
             app.UseAuthorization();
 
