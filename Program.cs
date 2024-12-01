@@ -45,6 +45,17 @@ namespace ResourceBookingAPI
                 };
             });
 
+            //Configure React
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReactApp", policy =>
+                {
+                    policy.AllowAnyOrigin()       
+                          .AllowAnyMethod()       
+                          .AllowAnyHeader();      
+                });
+            });
+
             //Configure MongoDB
             builder.Services.Configure<MongoConfig>(
                 builder.Configuration.GetSection("MongoDbSettings"));
