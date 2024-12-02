@@ -7,6 +7,7 @@ namespace ResourceBookingAPI.Services
         public Task<bool> DeleteFile(string url)
         {
             throw new NotImplementedException();
+            //
         }
 
         public Task<string> UploadFile(IFormFile file)
