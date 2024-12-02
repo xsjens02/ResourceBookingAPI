@@ -17,24 +17,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Debug: Liste alle filer i repositoryet
-      - name: List repository files for debugging
-        run: |
-          echo "Listing all files in the repository..."
-          ls -R  # List all files recursively
-
       - name: Set up .NET SDK
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0'
 
-      - name: Verify .NET installation
-        run: |
-          dotnet --version
-
       - name: Build and deploy
         run: |
-          # Kør .NET publish med den korrekte sti til .csproj i roden af repositoryet
           dotnet publish ResourceBookingAPI.csproj -c Release -o ./publish
-          echo "Deploying with secret key: $CDN_KEY"
-          ./deploy-script.sh
