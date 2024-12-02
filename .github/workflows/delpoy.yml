@@ -9,8 +9,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     env:
-      CDN_KEY: ${{ secrets.TEST_VAR }}
+      CDN_KEY: ${{ secrets.TEST_VAR }}  # Din secret som miljøvariabel
 
     steps:
       - name: Checkout code
@@ -21,7 +22,11 @@ jobs:
         with:
           dotnet-version: '8.0'  
 
+      - name: Verify .NET installation
+        run: |
+          dotnet --version
+
       - name: Build and deploy
         run: |
-          dotnet publish -c Release -o ./publish
+          dotnet publish ResourceBookingAPI/ResourceBookingAPI.csproj -c Release -o ./publish
           ./deploy-script.sh
