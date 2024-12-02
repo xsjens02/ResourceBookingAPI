@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      CDN_KEY: ${{ secrets.TEST_VAR }}  # Din secret som miljøvariabel
+      CDN_KEY: ${{ secrets.TEST_VAR }}
 
     steps:
       - name: Checkout code
@@ -21,6 +21,10 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0'
+
+      - name: Print environment variables (for debugging)
+        run: |
+          echo "CDN_KEY is: $CDN_KEY"
 
       - name: Build and deploy
         run: |
