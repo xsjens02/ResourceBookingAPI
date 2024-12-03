@@ -2,7 +2,7 @@
 {
     public interface ICdnService
     {
-        Task<string> UploadFile(IFormFile file);
-        Task<bool> DeleteFile(string url);
+        Task<string?> Upload(IFormFile file);
+        Task<bool> Delete(string url);
     }
 }

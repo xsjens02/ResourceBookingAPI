@@ -17,9 +17,29 @@ namespace ResourceBookingAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            //Configure appsettings
+            DotNetEnv.Env.Load();
+            builder.Configuration.AddEnvironmentVariables();
+            builder.Configuration["MongoDbSettings:ConnectionString"] = Environment.GetEnvironmentVariable("MONGO_CON_STR");
+            builder.Configuration["MongoDbSettings:DatabaseName"] = Environment.GetEnvironmentVariable("MONGO_DB_NAME");
+            builder.Configuration["GitHubCdnConfig:PAT"] = Environment.GetEnvironmentVariable("GH_CDN_PAT");
+            builder.Configuration["GitHubCdnConfig:ApiURL"] = Environment.GetEnvironmentVariable("GH_API_URL");
+            builder.Configuration["JwtConfig:Key"] = Environment.GetEnvironmentVariable("JWT_KEY");
+
+            builder.Services.AddHttpClient();
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            //Configure MongoDB
+            builder.Services.Configure<MongoConfig>(
+                builder.Configuration.GetSection("MongoDbSettings"));
+            builder.Services.AddSingleton<IMongoService, MongoService>();
+
+            //Configure GithubCDN
+            builder.Services.Configure<GitHubCdnConfig>(
+                builder.Configuration.GetSection("GitHubCdnConfig"));
+            builder.Services.AddSingleton<ICdnService, GitHubCdnService>();
 
             //Configure JWT Authentication
             builder.Services.Configure<JwtConfig>(
@@ -45,10 +65,10 @@ namespace ResourceBookingAPI
                 };
             });
 
-            //Configure React
+            //Configure CORS
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowReactApp", policy =>
+                options.AddPolicy("AllowAll", policy =>
                 {
                     policy.AllowAnyOrigin()       
                           .AllowAnyMethod()       
@@ -56,18 +76,13 @@ namespace ResourceBookingAPI
                 });
             });
 
-            //Configure MongoDB
-            builder.Services.Configure<MongoConfig>(
-                builder.Configuration.GetSection("MongoDbSettings"));
-            builder.Services.AddSingleton<IMongoService, MongoService>();
-
-            //Register repositories
+            //Configure repositories
             builder.Services.AddSingleton<ICrudRepos<Booking, string>, BookingMongoRepos>();
             builder.Services.AddSingleton<ICrudRepos<ErrorReport, string>, ErrorReportMongoRepos>();
             builder.Services.AddSingleton<IInstitutionRepos<Institution, string>, InstitutionMongoRepos>();
             builder.Services.AddSingleton<ICrudRepos<Resource, string>, ResourceMongoRepos>();
             builder.Services.AddSingleton<ICrudRepos<User, string>, UserMongoRepos>();
-            builder.Services.AddSingleton<ILoginRepos, LoginMongoRepos>();
+            builder.Services.AddSingleton<ILoginRepos, UserMongoRepos>();
 
             var app = builder.Build();
 
@@ -79,12 +94,9 @@ namespace ResourceBookingAPI
 
             //Configure middleware
             app.UseHttpsRedirection();
-
-            app.UseCors("AllowReactApp");
-
+            app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();
-
             app.MapControllers();
 
             app.Run();

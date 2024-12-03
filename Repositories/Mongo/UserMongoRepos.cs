@@ -1,23 +1,30 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using ResourceBookingAPI.Interfaces.Repositories;
 using ResourceBookingAPI.Interfaces.Repositories.CRUD;
 using ResourceBookingAPI.Interfaces.Services;
 using ResourceBookingAPI.Models;
 
 namespace ResourceBookingAPI.Repositories.Mongo
 {
-    public class UserMongoRepos : ICrudRepos<User, string>
+    public class UserMongoRepos : ICrudRepos<User, string>, ILoginRepos
     {
         private IMongoCollection<User> _users;
+        private readonly PasswordHasher<User> _passwordHasher;
         public UserMongoRepos(IMongoService mongoService)
         {
             _users = mongoService.GetCollection<User>("users");
+            _passwordHasher = new PasswordHasher<User>();
         }
         public async Task<User> Get(string id)
         {
             var user = await _users.Find(u => u.Id == id).FirstOrDefaultAsync();
             if (user != null)
+            {
+                user.Username = null;
                 user.Password = null;
+            }
 
             return user;
         }
@@ -28,7 +35,10 @@ namespace ResourceBookingAPI.Repositories.Mongo
             var users = await _users.Find(filter).ToListAsync();
 
             foreach (var user in users)
+            {
+                user.Username = null;
                 user.Password = null;
+            }
 
             return users;
         }
@@ -37,6 +47,8 @@ namespace ResourceBookingAPI.Repositories.Mongo
         {
             if (!string.IsNullOrWhiteSpace(entity.Id))
                 entity.Id = null;
+
+            entity.Password = _passwordHasher.HashPassword(entity, entity.Password);
 
             await _users.InsertOneAsync(entity);
         }
@@ -69,6 +81,17 @@ namespace ResourceBookingAPI.Repositories.Mongo
             var filter = Builders<User>.Filter.Eq(u => u.Id, id);
             var result = await _users.DeleteOneAsync(filter);
             return result.DeletedCount > 0;
+        }
+
+        public async Task<User> FetchUser(string username)
+        {
+            return await _users.Find(u => u.Username == username).FirstOrDefaultAsync();
+        }
+
+        public bool ValidatePassword(User user, string password)
+        {
+            var result = _passwordHasher.VerifyHashedPassword(user, user.Password, password);
+            return result == PasswordVerificationResult.Success;
         }
     }
 }

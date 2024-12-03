@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace ResourceBookingAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class Test : ControllerBase
+    [Route("api/test")]
+    [AllowAnonymous]
+    public class TestController : ControllerBase
     {
         [HttpGet]
         public string Get()

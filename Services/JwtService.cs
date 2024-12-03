@@ -13,11 +13,11 @@ namespace ResourceBookingAPI.Services
     public class JwtService : IJwtService
     {
         private readonly JwtConfig _jwtConfig;
-        private readonly ILoginRepos _loginRepo;
-        public JwtService(IOptions<JwtConfig> jwtConfig, ILoginRepos loginRepo)
+        private readonly ILoginRepos _userRepo;
+        public JwtService(IOptions<JwtConfig> jwtConfig, ILoginRepos userRepo)
         {
             _jwtConfig = jwtConfig.Value;
-            _loginRepo = loginRepo;
+            _userRepo = userRepo;
         }
 
         public async Task<LoginResponseDto?> GenerateToken(LoginRequestDto request)
@@ -25,8 +25,8 @@ namespace ResourceBookingAPI.Services
             if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
                 return null;
 
-            var user = await _loginRepo.GetUser(request.Username);
-            if (user == null || !await _loginRepo.ValidatePassword(user, request.Password))
+            var user = await _userRepo.FetchUser(request.Username);
+            if (user == null || !_userRepo.ValidatePassword(user, request.Password))
                 return null;
 
             var tokenExpiryTimeStamp = DateTime.UtcNow.AddMinutes(_jwtConfig.TokenValidityMins);

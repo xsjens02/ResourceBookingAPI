@@ -4,7 +4,7 @@ namespace ResourceBookingAPI.Interfaces.Repositories
 {
     public interface ILoginRepos
     {
-        Task<User> GetUser(string username);
-        Task<bool> ValidatePassword(User user, string password);
+        Task<User> FetchUser(string username);
+        bool ValidatePassword(User user, string password);
     }
 }
