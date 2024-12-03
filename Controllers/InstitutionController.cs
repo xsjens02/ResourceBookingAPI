@@ -8,7 +8,8 @@ namespace ResourceBookingAPI.Controllers
 {
     [ApiController]
     [Route("api/institutions")]
-    [Authorize(Roles = "admin")]
+    [AllowAnonymous]
+    //[Authorize(Roles = "admin")]
     public class InstitutionController : ControllerBase, IInstitutionController<Institution, string>
     {
         private readonly IInstitutionRepos<Institution, string> _institutionRepo;
