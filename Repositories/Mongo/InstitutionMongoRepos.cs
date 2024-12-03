@@ -13,6 +13,15 @@ namespace ResourceBookingAPI.Repositories.Mongo
         {
             _institutions = mongoService.GetCollection<Institution>("institutions");
         }
+
+        public async Task Create([FromBody] Institution entity)
+        {
+            if (!string.IsNullOrWhiteSpace(entity.Id))
+                entity.Id = null;
+
+            await _institutions.InsertOneAsync(entity);
+        }
+
         public async Task<Institution> Get(string id)
         {
             return await _institutions.Find(i => i.Id == id).FirstOrDefaultAsync();

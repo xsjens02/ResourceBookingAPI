@@ -54,7 +54,7 @@ namespace ResourceBookingAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Failed to user. Error:{ex.Message}");
+                return StatusCode(500, $"Failed to create user. Error:{ex.Message}");
             }
         }
 

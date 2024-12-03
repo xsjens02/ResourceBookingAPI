@@ -18,6 +18,23 @@ namespace ResourceBookingAPI.Controllers
             _institutionRepo = institutionRepo;
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] Institution entity)
+        {
+            if (entity == null)
+                return BadRequest("Institution entity cannot be null");
+
+            try
+            {
+                await _institutionRepo.Create(entity);
+                return CreatedAtAction(nameof(Get), new { id = entity.Id }, entity);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Failed to create institution. Error:{ex.Message}");
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
