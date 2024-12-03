@@ -17,16 +17,6 @@ namespace ResourceBookingAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            var cdnKey = Environment.GetEnvironmentVariable("CDN_KEY");
-            if(cdnKey != null)
-            {
-                Console.WriteLine("Key found");
-            } 
-            else
-            {
-                Console.WriteLine("Key not found");
-            }
-
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
