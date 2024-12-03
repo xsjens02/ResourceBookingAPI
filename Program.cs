@@ -18,7 +18,6 @@ namespace ResourceBookingAPI
             var builder = WebApplication.CreateBuilder(args);
 
             //Configure appsettings
-            DotNetEnv.Env.Load();
             builder.Configuration.AddEnvironmentVariables();
             builder.Configuration["MongoDbSettings:ConnectionString"] = Environment.GetEnvironmentVariable("MONGO_CON_STR");
             builder.Configuration["MongoDbSettings:DatabaseName"] = Environment.GetEnvironmentVariable("MONGO_DB_NAME");

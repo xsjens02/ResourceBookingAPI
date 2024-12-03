@@ -26,12 +26,19 @@ namespace ResourceBookingAPI.Services
             form.Add(fileContent, "file", file.FileName);
 
             var postUrl = $"{_gitHubCdnConfig.ApiURL}{file.FileName}";
-
             var response = await _httpClient.PostAsync(postUrl, form);
-            if (response.IsSuccessStatusCode)
-                return await response.Content.ReadAsStringAsync();
 
-            return null;
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsStringAsync();
+            }
+            else
+            {
+                var errorResponse = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error: {response.StatusCode}");
+                Console.WriteLine($"Response content: {errorResponse}");
+                return null;
+            }
         }
         public async Task<bool> Delete(string url)
         {
