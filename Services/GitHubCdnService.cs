@@ -17,41 +17,38 @@ namespace ResourceBookingAPI.Services
             _httpClient = httpClientFactory.CreateClient();
             _httpClient.DefaultRequestHeaders.Authorization = 
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _gitHubCdnConfig.PAT);
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "ResourceBookingApp/1.0");
         }
         public async Task<string?> Upload(IFormFile file)
         {
-            using var form = new MultipartFormDataContent();
-            using var stream = file.OpenReadStream();
-            var fileContent = new StreamContent(stream);
-            form.Add(fileContent, "file", file.FileName);
+            using var memoryStream = new MemoryStream();
+            await file.CopyToAsync(memoryStream);
+            var fileContentBase64 = Convert.ToBase64String(memoryStream.ToArray());
 
-            var postUrl = $"{_gitHubCdnConfig.ApiURL}{file.FileName}";
-            var response = await _httpClient.PostAsync(postUrl, form);
+            var commitData = new { message = $"Upload {file.FileName}", content = fileContentBase64 };
+            var commitDataJson = JsonSerializer.Serialize(commitData);
+            var content = new StringContent(commitDataJson, Encoding.UTF8, "application/json");
 
+            var apiUrl = $"{_gitHubCdnConfig.ApiURL}{file.FileName}";
+
+            var response = await _httpClient.PutAsync(apiUrl, content);
             if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadAsStringAsync();
-            }
-            else
-            {
-                var errorResponse = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Error: {response.StatusCode}");
-                Console.WriteLine($"Response content: {errorResponse}");
-                return null;
-            }
+                return $"{_gitHubCdnConfig.PagesURL}{file.FileName}";
+            
+            return null;
         }
-        public async Task<bool> Delete(string url)
+        public async Task<bool> Delete(string filePath)
         {
-            var fileName = Path.GetFileName(new Uri(url).LocalPath);
-            var deleteUrl = $"{_gitHubCdnConfig.ApiURL}{fileName}";
+            var fileName = Path.GetFileName(new Uri(filePath).LocalPath);
+            var apiUrl = $"{_gitHubCdnConfig.ApiURL}{fileName}";
 
-            var sha = await GetFileSha(fileName);
-            if (sha == null)
+            var fileSha = await GetFileSha(fileName);
+            if (fileSha == null)
                 return false;
 
-            var requestBody = new { message = "Deleting file", Sha = sha };
+            var requestBody = new { message = "Deleting file", sha = fileSha };
 
-            var requestMessage = new HttpRequestMessage(HttpMethod.Delete, deleteUrl)
+            var requestMessage = new HttpRequestMessage(HttpMethod.Delete, apiUrl)
             {
                 Content = new StringContent(
                     JsonSerializer.Serialize(requestBody),
@@ -66,10 +63,9 @@ namespace ResourceBookingAPI.Services
 
         private async Task<string?> GetFileSha(string fileName)
         {
-            var fileUrl = $"{_gitHubCdnConfig.ApiURL}{fileName}";
+            var apiUrl = $"{_gitHubCdnConfig.ApiURL}{fileName}";
 
-            var response = await _httpClient.GetAsync(fileUrl);
-
+            var response = await _httpClient.GetAsync(apiUrl);
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();

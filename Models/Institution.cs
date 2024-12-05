@@ -12,8 +12,8 @@ namespace ResourceBookingAPI.Models
         [BsonElement("name")]
         public string? Name { get; set; }
 
-        [BsonElement("institutionImage")]
-        public byte[]? InstitutionImage { get; set; }
+        [BsonElement("imageUrl")]
+        public string? imageUrl { get; set; }
 
         [BsonElement("openTime")]
         public string? OpenTime { get; set; }

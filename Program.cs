@@ -23,6 +23,7 @@ namespace ResourceBookingAPI
             builder.Configuration["MongoDbSettings:DatabaseName"] = Environment.GetEnvironmentVariable("MONGO_DB_NAME");
             builder.Configuration["GitHubCdnConfig:PAT"] = Environment.GetEnvironmentVariable("GH_CDN_PAT");
             builder.Configuration["GitHubCdnConfig:ApiURL"] = Environment.GetEnvironmentVariable("GH_API_URL");
+            builder.Configuration["GitHubCdnConfig:PagesURL"] = Environment.GetEnvironmentVariable("GH_PAGES_URL");
             builder.Configuration["JwtConfig:Key"] = Environment.GetEnvironmentVariable("JWT_KEY");
 
             builder.Services.AddHttpClient();

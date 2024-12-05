@@ -28,12 +28,12 @@ namespace ResourceBookingAPI.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> Delete(string url)
+        public async Task<IActionResult> Delete(string filePath)
         {
-            if (string.IsNullOrEmpty(url))
+            if (string.IsNullOrEmpty(filePath))
                 return BadRequest("Url cannot be null or empty");
 
-            var result = await _cdnService.Delete(url);
+            var result = await _cdnService.Delete(filePath);
             if (result)
                 return Ok();
 

@@ -15,8 +15,8 @@ namespace ResourceBookingAPI.Models
         [BsonElement("description")]
         public string? Description { get; set; }
 
-        [BsonElement("resourceImage")]
-        public byte[]? ResourceImage { get; set; }
+        [BsonElement("imageUrl")]
+        public string? imageUrl { get; set; }
 
         [BsonElement("institutionId")]
         [BsonRepresentation(BsonType.ObjectId)]

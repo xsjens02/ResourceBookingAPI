@@ -21,6 +21,7 @@
           MONGO_DB_NAME: ${MONGO_DB_NAME}
           GH_CDN_PAT: ${GH_CDN_PAT}
           GH_API_URL: ${GH_API_URL}
+          GH_PAGES_URL: ${GH_PAGES_URL}
           JWT_KEY: ${JWT_KEY}
         env_file:
         - .env
