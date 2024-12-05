@@ -7,7 +7,7 @@ namespace ResourceBookingAPI.Controllers
     [ApiController]
     [Route("api/test")]
     [AllowAnonymous]
-    public class TestController : ControllerBase
+    public class TestConnectionController : ControllerBase
     {
         [HttpGet]
         public string Get()

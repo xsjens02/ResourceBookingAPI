@@ -53,6 +53,7 @@ namespace ResourceBookingAPI.Services
             {
                 UserId = user.Id,
                 InstitutionId = user.InstitutionId,
+                UserRole = user.Role,
                 AccessToken = accessToken,
                 ExpiresIn = (int)tokenExpiryTimeStamp.Subtract(DateTime.UtcNow).TotalSeconds
             };

@@ -9,6 +9,10 @@ namespace ResourceBookingAPI.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
 
+        [BsonElement("institutionId")]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? InstitutionId { get; set; }
+
         [BsonElement("userId")]
         [BsonRepresentation(BsonType.ObjectId)]
         public string? UserId { get; set; }

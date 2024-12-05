@@ -10,10 +10,10 @@ namespace ResourceBookingAPI.Controllers
     [Route("api/institutions")]
     [AllowAnonymous]
     //[Authorize(Roles = "admin")]
-    public class InstitutionController : ControllerBase, IInstitutionController<Institution, string>
+    public class InstitutionController : ControllerBase, IInstitutionController
     {
-        private readonly IInstitutionRepos<Institution, string> _institutionRepo;
-        public InstitutionController(IInstitutionRepos<Institution, string> institutionRepo)
+        private readonly IInstitutionRepos _institutionRepo;
+        public InstitutionController(IInstitutionRepos institutionRepo)
         {
             _institutionRepo = institutionRepo;
         }

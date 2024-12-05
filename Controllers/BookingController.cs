@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ResourceBookingAPI.Interfaces.Controllers.CRUD;
-using ResourceBookingAPI.Interfaces.Repositories.CRUD;
+using ResourceBookingAPI.DTOs;
+using ResourceBookingAPI.Interfaces.Controllers;
+using ResourceBookingAPI.Interfaces.Repositories;
 using ResourceBookingAPI.Models;
 
 namespace ResourceBookingAPI.Controllers
@@ -9,10 +10,10 @@ namespace ResourceBookingAPI.Controllers
     [ApiController]
     [Route("api/bookings")]
     [Authorize]
-    public class BookingController : ControllerBase, ICrudController<Booking, string>
+    public class BookingController : ControllerBase, IBookingController
     {
-        private readonly ICrudRepos<Booking, string> _bookingRepo;
-        public BookingController(ICrudRepos<Booking, string> bookingRepo)
+        private readonly IBookingRepos _bookingRepo;
+        public BookingController(IBookingRepos bookingRepo)
         {
             _bookingRepo = bookingRepo;
         }
@@ -37,6 +38,19 @@ namespace ResourceBookingAPI.Controllers
                 return BadRequest("UserId cannot be null");
 
             var bookings = await _bookingRepo.GetAll(userId);
+            return Ok(bookings);
+        }
+
+        [HttpPost("statistic")]
+        public async Task<IActionResult> GetStatistic([FromBody] BookingStatRequestDto statRequest)
+        {
+            if (statRequest == null)
+                return BadRequest("Request cannot be null");
+
+            if (string.IsNullOrWhiteSpace(statRequest.InstitutionId))
+                return BadRequest("InstitutionId cannot be null or empty");
+
+            var bookings = await _bookingRepo.GetAllWithinDates(statRequest.StartDate, statRequest.EndTime, statRequest.InstitutionId);
             return Ok(bookings);
         }
 

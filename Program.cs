@@ -77,9 +77,9 @@ namespace ResourceBookingAPI
             });
 
             //Configure repositories
-            builder.Services.AddSingleton<ICrudRepos<Booking, string>, BookingMongoRepos>();
+            builder.Services.AddSingleton<IBookingRepos, BookingMongoRepos>();
             builder.Services.AddSingleton<ICrudRepos<ErrorReport, string>, ErrorReportMongoRepos>();
-            builder.Services.AddSingleton<IInstitutionRepos<Institution, string>, InstitutionMongoRepos>();
+            builder.Services.AddSingleton<IInstitutionRepos, InstitutionMongoRepos>();
             builder.Services.AddSingleton<ICrudRepos<Resource, string>, ResourceMongoRepos>();
             builder.Services.AddSingleton<ICrudRepos<User, string>, UserMongoRepos>();
             builder.Services.AddSingleton<ILoginRepos, UserMongoRepos>();

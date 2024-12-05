@@ -6,7 +6,7 @@ using ResourceBookingAPI.Models;
 
 namespace ResourceBookingAPI.Repositories.Mongo
 {
-    public class InstitutionMongoRepos : IInstitutionRepos<Institution, string>
+    public class InstitutionMongoRepos : IInstitutionRepos
     {
         private IMongoCollection<Institution> _institutions;
         public InstitutionMongoRepos(IMongoService mongoService)
