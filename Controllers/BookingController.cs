@@ -7,6 +7,9 @@ using ResourceBookingAPI.Models;
 
 namespace ResourceBookingAPI.Controllers
 {
+    /// <summary>
+    /// Handles booking-related operations such as creating, retrieving, updating and deleting bookings.
+    /// </summary>
     [ApiController]
     [Route("api/bookings")]
     [Authorize]

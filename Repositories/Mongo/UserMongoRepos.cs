@@ -58,22 +58,22 @@ namespace ResourceBookingAPI.Repositories.Mongo
             entity.Id = id;
 
             var filter = Builders<User>.Filter.Eq(u => u.Id, id);
+            var updateDefinitions = new List<UpdateDefinition<User>>();
 
-            if (entity.Password == null)
-            {
-                var update = Builders<User>.Update
-                    .Set(u => u.Name, entity.Name)
-                    .Set(u => u.Email, entity.Email)
-                    .Set(u => u.Phone, entity.Phone)
-                    .Set(u => u.Role, entity.Role)
-                    .Set(u => u.InstitutionId, entity.InstitutionId);
+            if (entity.Username != null)
+                updateDefinitions.Add(Builders<User>.Update.Set(u => u.Username, entity.Username));
+            if (entity.Password != null)
+                updateDefinitions.Add(Builders<User>.Update.Set(u => u.Password, entity.Password));
+            
+            updateDefinitions.Add(Builders<User>.Update.Set(u => u.Name, entity.Name));
+            updateDefinitions.Add(Builders<User>.Update.Set(u => u.Email, entity.Email));
+            updateDefinitions.Add(Builders<User>.Update.Set(u => u.Phone, entity.Phone));
+            updateDefinitions.Add(Builders<User>.Update.Set(u => u.Role, entity.Role));
+            updateDefinitions.Add(Builders<User>.Update.Set(u => u.InstitutionId, entity.InstitutionId));
 
-                var updateResult = await _users.UpdateOneAsync(filter, update);
-                return updateResult.ModifiedCount > 0;
-            }
-
-            var replaceResult = await _users.ReplaceOneAsync(filter, entity);
-            return replaceResult.ModifiedCount > 0;
+            var update = Builders<User>.Update.Combine(updateDefinitions);
+            var updateResult = await _users.UpdateOneAsync(filter, update);
+            return updateResult.ModifiedCount > 0;
         }
 
         public async Task<bool> Delete(string id)
