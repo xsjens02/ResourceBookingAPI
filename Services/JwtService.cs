@@ -66,6 +66,7 @@ namespace ResourceBookingAPI.Services
             return new LoginResponseDto
             {
                 UserId = user.Id,
+                Name = user.Name,
                 InstitutionId = user.InstitutionId,
                 UserRole = user.Role,
                 AccessToken = accessToken,
