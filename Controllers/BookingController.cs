@@ -8,7 +8,8 @@ using ResourceBookingAPI.Models;
 namespace ResourceBookingAPI.Controllers
 {
     /// <summary>
-    /// Handles booking-related operations such as creating, retrieving, updating and deleting bookings.
+    /// Controller for managing bookings.
+    /// Includes routes for retrieving, creating, updating, and deleting bookings.
     /// </summary>
     [ApiController]
     [Route("api/bookings")]
@@ -16,11 +17,21 @@ namespace ResourceBookingAPI.Controllers
     public class BookingController : ControllerBase, IBookingController
     {
         private readonly IBookingRepos _bookingRepo;
+
+        /// <summary>
+        /// Initializes the BookingController with a repository for interacting with bookings.
+        /// </summary>
+        /// <param name="bookingRepo">The repository used to manage bookings.</param>
         public BookingController(IBookingRepos bookingRepo)
         {
             _bookingRepo = bookingRepo;
         }
 
+        /// <summary>
+        /// Retrieves a booking by its unique ID.
+        /// </summary>
+        /// <param name="id">The ID of the booking to retrieve.</param>
+        /// <returns>An IActionResult indicating the result of the operation.</returns>
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
@@ -34,6 +45,11 @@ namespace ResourceBookingAPI.Controllers
             return Ok(booking);
         }
 
+        /// <summary>
+        /// Retrieves all bookings for a specific user.
+        /// </summary>
+        /// <param name="userId">The user ID used to filter bookings.</param>
+        /// <returns>An IActionResult containing the list of bookings for the user.</returns>
         [HttpGet("all")]
         public async Task<IActionResult> GetAll([FromQuery] string userId)
         {
@@ -44,7 +60,14 @@ namespace ResourceBookingAPI.Controllers
             return Ok(bookings);
         }
 
+        /// <summary>
+        /// Retrieves booking statistics within a date range for an institution.
+        /// Accessible only to users with the "admin" role.
+        /// </summary>
+        /// <param name="statRequest">The statistics request containing the date range and institution ID.</param>
+        /// <returns>An IActionResult with the list of bookings within the date range.</returns>
         [HttpPost("statistic")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetStatistic([FromBody] BookingStatRequestDto statRequest)
         {
             if (statRequest == null)
@@ -57,6 +80,11 @@ namespace ResourceBookingAPI.Controllers
             return Ok(bookings);
         }
 
+        /// <summary>
+        /// Retrieves all pending bookings for a user.
+        /// </summary>
+        /// <param name="pendingRequest">The request containing the user ID and current date.</param>
+        /// <returns>An IActionResult with the list of pending bookings for the user.</returns>
         [HttpPost("pending")]
         public async Task<IActionResult> GetPending([FromBody] BookingPendingRequestDto pendingRequest)
         {
@@ -70,6 +98,11 @@ namespace ResourceBookingAPI.Controllers
             return Ok(bookings);
         }
 
+        /// <summary>
+        /// Retrieves all bookings for a resource on a specific date.
+        /// </summary>
+        /// <param name="resourceRequest">The request containing the resource ID and date.</param>
+        /// <returns>An IActionResult with the list of bookings for the resource on the specified date.</returns>
         [HttpPost("resourcebookings")]
         public async Task<IActionResult> GetResourceBookings([FromBody] ResourceBookingsRequestDto resourceRequest)
         {
@@ -83,6 +116,11 @@ namespace ResourceBookingAPI.Controllers
             return Ok(bookings);
         }
 
+        /// <summary>
+        /// Creates a new booking.
+        /// </summary>
+        /// <param name="entity">The booking entity to create.</param>
+        /// <returns>An IActionResult indicating the result of the creation operation.</returns>
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Booking entity)
         {
@@ -93,13 +131,19 @@ namespace ResourceBookingAPI.Controllers
             {
                 await _bookingRepo.Create(entity);
                 return CreatedAtAction(nameof(Get), new { id = entity.Id }, entity);
-            } 
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Failed to create booking. Error:{ex.Message}"); 
+                return StatusCode(500, $"Failed to create booking. Error:{ex.Message}");
             }
         }
 
+        /// <summary>
+        /// Updates an existing booking by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the booking to update.</param>
+        /// <param name="entity">The updated booking entity.</param>
+        /// <returns>An IActionResult indicating the result of the update operation.</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(string id, [FromBody] Booking entity)
         {
@@ -109,21 +153,26 @@ namespace ResourceBookingAPI.Controllers
             if (entity == null)
                 return BadRequest("Booking entity cannot be null");
 
-            var succes = await _bookingRepo.Update(id, entity);
-            if (succes)
+            var success = await _bookingRepo.Update(id, entity);
+            if (success)
                 return NoContent();
 
             return NotFound($"No booking found with Id:{id}");
         }
 
+        /// <summary>
+        /// Deletes a booking by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the booking to delete.</param>
+        /// <returns>An IActionResult indicating the result of the deletion operation.</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
 
-            var succes = await _bookingRepo.Delete(id);
-            if (succes)
+            var success = await _bookingRepo.Delete(id);
+            if (success)
                 return NoContent();
 
             return NotFound($"No booking found with Id:{id}");

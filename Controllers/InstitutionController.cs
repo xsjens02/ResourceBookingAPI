@@ -6,6 +6,10 @@ using ResourceBookingAPI.Models;
 
 namespace ResourceBookingAPI.Controllers
 {
+    /// <summary>
+    /// Controller for managing institutions.
+    /// Includes routes for creating, retrieving, and updating institution data.
+    /// </summary>
     [ApiController]
     [Route("api/institutions")]
     [AllowAnonymous]
@@ -13,11 +17,21 @@ namespace ResourceBookingAPI.Controllers
     public class InstitutionController : ControllerBase, IInstitutionController
     {
         private readonly IInstitutionRepos _institutionRepo;
+
+        /// <summary>
+        /// Initializes the InstitutionController with the repository for institution management.
+        /// </summary>
+        /// <param name="institutionRepo">The repository used for managing institutions.</param>
         public InstitutionController(IInstitutionRepos institutionRepo)
         {
             _institutionRepo = institutionRepo;
         }
 
+        /// <summary>
+        /// Creates a new institution.
+        /// </summary>
+        /// <param name="entity">The institution entity to create.</param>
+        /// <returns>An IActionResult indicating the result of the create operation.</returns>
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Institution entity)
         {
@@ -35,6 +49,11 @@ namespace ResourceBookingAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets an institution by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the institution to retrieve.</param>
+        /// <returns>An IActionResult containing the institution or an error message.</returns>
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
@@ -48,6 +67,12 @@ namespace ResourceBookingAPI.Controllers
             return Ok(institution);
         }
 
+        /// <summary>
+        /// Updates an existing institution.
+        /// </summary>
+        /// <param name="id">The ID of the institution to update.</param>
+        /// <param name="entity">The updated institution entity.</param>
+        /// <returns>An IActionResult indicating the result of the update operation.</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(string id, [FromBody] Institution entity)
         {

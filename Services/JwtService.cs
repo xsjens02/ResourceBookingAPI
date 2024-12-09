@@ -10,16 +10,30 @@ using System.Text;
 
 namespace ResourceBookingAPI.Services
 {
+    /// <summary>
+    /// Service for handling JWT token generation and validation.
+    /// </summary>
     public class JwtService : IJwtService
     {
         private readonly JwtConfig _jwtConfig;
         private readonly ILoginRepos _userRepo;
+
+        /// <summary>
+        /// Initializes the JwtService with configuration and user repository.
+        /// </summary>
+        /// <param name="jwtConfig">The JWT configuration settings.</param>
+        /// <param name="userRepo">The repository for user data and validation.</param>
         public JwtService(IOptions<JwtConfig> jwtConfig, ILoginRepos userRepo)
         {
             _jwtConfig = jwtConfig.Value;
             _userRepo = userRepo;
         }
 
+        /// <summary>
+        /// Generates a JWT token for a user based on provided credentials.
+        /// </summary>
+        /// <param name="request">The login request containing username and password.</param>
+        /// <returns>A LoginResponseDto containing user details and access token if successful, otherwise null.</returns>
         public async Task<LoginResponseDto?> GenerateToken(LoginRequestDto request)
         {
             if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))

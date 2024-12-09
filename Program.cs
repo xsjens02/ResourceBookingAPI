@@ -15,9 +15,11 @@ namespace ResourceBookingAPI
     {
         public static void Main(string[] args)
         {
+            // Create and configure the web application builder
             var builder = WebApplication.CreateBuilder(args);
 
-            //Configure appsettings
+            // Configure appsettings from environment variables
+            // These variables are used for MongoDB, GitHub CDN, and JWT configuration
             builder.Configuration.AddEnvironmentVariables();
             builder.Configuration["MongoDbSettings:ConnectionString"] = Environment.GetEnvironmentVariable("MONGO_CON_STR");
             builder.Configuration["MongoDbSettings:DatabaseName"] = Environment.GetEnvironmentVariable("MONGO_DB_NAME");
@@ -26,26 +28,28 @@ namespace ResourceBookingAPI
             builder.Configuration["GitHubCdnConfig:PagesURL"] = Environment.GetEnvironmentVariable("GH_PAGES_URL");
             builder.Configuration["JwtConfig:Key"] = Environment.GetEnvironmentVariable("JWT_KEY");
 
-            builder.Services.AddHttpClient();
-            builder.Services.AddControllers();
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            // Add required services for the application
+            builder.Services.AddHttpClient(); 
+            builder.Services.AddControllers(); 
+            builder.Services.AddEndpointsApiExplorer(); 
+            builder.Services.AddSwaggerGen(); 
 
-            //Configure MongoDB
+            // Configure MongoDB settings from the configuration file
             builder.Services.Configure<MongoConfig>(
                 builder.Configuration.GetSection("MongoDbSettings"));
-            builder.Services.AddSingleton<IMongoService, MongoService>();
+            builder.Services.AddSingleton<IMongoService, MongoService>(); // Register MongoService as singleton
 
-            //Configure GithubCDN
+            // Configure GitHub CDN settings and register the service
             builder.Services.Configure<GitHubCdnConfig>(
                 builder.Configuration.GetSection("GitHubCdnConfig"));
-            builder.Services.AddSingleton<ICdnService, GitHubCdnService>();
+            builder.Services.AddSingleton<ICdnService, GitHubCdnService>(); // Register GitHubCdnService for file uploads and deletions
 
-            //Configure JWT Authentication
+            // Configure JWT Authentication settings
             builder.Services.Configure<JwtConfig>(
                 builder.Configuration.GetSection("JwtConfig"));
-            builder.Services.AddSingleton<IJwtService, JwtService>();
+            builder.Services.AddSingleton<IJwtService, JwtService>(); // Register JwtService for token generation
 
+            // Set up JWT Authentication 
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -54,29 +58,29 @@ namespace ResourceBookingAPI
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidIssuer = builder.Configuration["JwtConfig:Issuer"],
-                    ValidAudience = builder.Configuration["JwtConfig:Audience"],
+                    ValidIssuer = builder.Configuration["JwtConfig:Issuer"], 
+                    ValidAudience = builder.Configuration["JwtConfig:Audience"], 
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration["JwtConfig:Key"]!)),
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true
+                        Encoding.UTF8.GetBytes(builder.Configuration["JwtConfig:Key"]!)), 
+                    ValidateIssuer = true, 
+                    ValidateAudience = true, 
+                    ValidateLifetime = true, 
+                    ValidateIssuerSigningKey = true 
                 };
             });
 
-            //Configure CORS
+            // Configure CORS 
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", policy =>
                 {
-                    policy.AllowAnyOrigin()       
-                          .AllowAnyMethod()       
-                          .AllowAnyHeader();      
+                    policy.AllowAnyOrigin() 
+                          .AllowAnyMethod() 
+                          .AllowAnyHeader(); 
                 });
             });
 
-            //Configure repositories
+            // Register repositories for accessing the MongoDB collections
             builder.Services.AddSingleton<IBookingRepos, BookingMongoRepos>();
             builder.Services.AddSingleton<ICrudRepos<ErrorReport, string>, ErrorReportMongoRepos>();
             builder.Services.AddSingleton<IInstitutionRepos, InstitutionMongoRepos>();
@@ -84,20 +88,22 @@ namespace ResourceBookingAPI
             builder.Services.AddSingleton<ICrudRepos<User, string>, UserMongoRepos>();
             builder.Services.AddSingleton<ILoginRepos, UserMongoRepos>();
 
+            // Build the application
             var app = builder.Build();
 
+            // Configure middleware 
             if (app.Environment.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwagger(); 
+                app.UseSwaggerUI(); 
             }
 
-            //Configure middleware
-            app.UseHttpsRedirection();
-            app.UseCors("AllowAll");
-            app.UseAuthentication();
-            app.UseAuthorization();
-            app.MapControllers();
+            // Set up middleware for HTTPS redirection, CORS, authentication, and authorization
+            app.UseHttpsRedirection(); 
+            app.UseCors("AllowAll"); // Enable CORS with the "AllowAll" policy
+            app.UseAuthentication(); 
+            app.UseAuthorization(); 
+            app.MapControllers(); 
 
             app.Run();
         }

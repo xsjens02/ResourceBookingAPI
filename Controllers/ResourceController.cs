@@ -6,17 +6,31 @@ using ResourceBookingAPI.Models;
 
 namespace ResourceBookingAPI.Controllers
 {
+    /// <summary>
+    /// Controller for managing resources.
+    /// Includes routes for retrieving, creating, updating, and deleting resources.
+    /// </summary>
     [ApiController]
     [Route("api/resources")]
     [Authorize]
     public class ResourceController : ControllerBase, ICrudController<Resource, string>
     {
         private readonly ICrudRepos<Resource, string> _resourceRepo;
+
+        /// <summary>
+        /// Initializes the ResourceController with the resource repository for managing resources.
+        /// </summary>
+        /// <param name="resourceRepo">The repository used for CRUD operations on resources.</param>
         public ResourceController(ICrudRepos<Resource, string> resourceRepo)
         {
             _resourceRepo = resourceRepo;
         }
 
+        /// <summary>
+        /// Retrieves a resource by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the resource to retrieve.</param>
+        /// <returns>An IActionResult containing the resource if found, or NotFound if no resource exists with the specified ID.</returns>
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
@@ -30,6 +44,11 @@ namespace ResourceBookingAPI.Controllers
             return Ok(resource);
         }
 
+        /// <summary>
+        /// Retrieves all resources for a specified institution.
+        /// </summary>
+        /// <param name="institutionId">The ID of the institution whose resources are to be retrieved.</param>
+        /// <returns>An IActionResult containing the list of resources for the given institution.</returns>
         [HttpGet("all")]
         public async Task<IActionResult> GetAll([FromQuery] string institutionId)
         {
@@ -40,6 +59,11 @@ namespace ResourceBookingAPI.Controllers
             return Ok(resources);
         }
 
+        /// <summary>
+        /// Creates a new resource.
+        /// </summary>
+        /// <param name="entity">The resource entity to create.</param>
+        /// <returns>An IActionResult indicating the result of the create operation.</returns>
         [HttpPost]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> Create([FromBody] Resource entity)
@@ -54,10 +78,16 @@ namespace ResourceBookingAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Failed to create resoure. Error:{ex.Message}");
+                return StatusCode(500, $"Failed to create resource. Error:{ex.Message}");
             }
         }
 
+        /// <summary>
+        /// Updates an existing resource by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the resource to update.</param>
+        /// <param name="entity">The updated resource entity.</param>
+        /// <returns>An IActionResult indicating the result of the update operation.</returns>
         [HttpPut("{id}")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> Update(string id, [FromBody] Resource entity)
@@ -75,6 +105,11 @@ namespace ResourceBookingAPI.Controllers
             return NotFound($"No resource found with Id:{id}");
         }
 
+        /// <summary>
+        /// Deletes a resource by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the resource to delete.</param>
+        /// <returns>An IActionResult indicating the result of the delete operation.</returns>
         [HttpDelete("{id}")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(string id)
