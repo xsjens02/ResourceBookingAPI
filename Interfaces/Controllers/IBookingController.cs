@@ -9,5 +9,7 @@ namespace ResourceBookingAPI.Interfaces.Controllers
         ICrudController<Booking, string>
     {
         Task<IActionResult> GetStatistic([FromBody]BookingStatRequestDto statRequest);
+        Task<IActionResult> GetPending([FromBody] BookingPendingRequestDto pendingRequest);
+        Task<IActionResult> GetResourceBookings([FromBody] ResourceBookingsRequestDto resourceRequest);
     }
 }

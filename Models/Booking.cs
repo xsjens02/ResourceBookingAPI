@@ -29,8 +29,5 @@ namespace ResourceBookingAPI.Models
 
         [BsonElement("endTime")]
         public string? EndTime { get; set; }
-
-        [BsonElement("active")]
-        public bool Active { get; set; }
     }
 }

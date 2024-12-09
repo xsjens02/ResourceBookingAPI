@@ -57,6 +57,32 @@ namespace ResourceBookingAPI.Controllers
             return Ok(bookings);
         }
 
+        [HttpPost("pending")]
+        public async Task<IActionResult> GetPending([FromBody] BookingPendingRequestDto pendingRequest)
+        {
+            if (pendingRequest == null)
+                return BadRequest("Request cannot be null");
+
+            if (string.IsNullOrWhiteSpace(pendingRequest.UserId))
+                return BadRequest("UserId cannot be null or empty");
+
+            var bookings = await _bookingRepo.GetAllPending(pendingRequest.UserId, pendingRequest.CurrentDate);
+            return Ok(bookings);
+        }
+
+        [HttpPost("resourcebookings")]
+        public async Task<IActionResult> GetResourceBookings([FromBody] ResourceBookingsRequestDto resourceRequest)
+        {
+            if (resourceRequest == null)
+                return BadRequest("Request cannot be null");
+
+            if (string.IsNullOrWhiteSpace(resourceRequest.ResourceId))
+                return BadRequest("ResourceId cannot be null or empty");
+
+            var bookings = await _bookingRepo.GetAllResourceBookings(resourceRequest.ResourceId, resourceRequest.Date);
+            return Ok(bookings);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Booking entity)
         {

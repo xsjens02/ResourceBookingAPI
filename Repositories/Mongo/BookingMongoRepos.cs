@@ -36,6 +36,28 @@ namespace ResourceBookingAPI.Repositories.Mongo
             return await _bookings.Find(filter).ToListAsync();
         }
 
+        public async Task<IEnumerable<Booking>> GetAllPending(string userId, DateTime currentDate)
+        {
+            var filter = Builders<Booking>.Filter.And(
+                Builders<Booking>.Filter.Eq(b => b.UserId, userId),          
+                Builders<Booking>.Filter.Gte(b => b.Date, currentDate)      
+            );
+
+            return await _bookings.Find(filter).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Booking>> GetAllResourceBookings(string resourceId, DateTime searchDate)
+        {
+            var targetDate = searchDate.Date;
+
+            var filter = Builders<Booking>.Filter.And(
+                Builders<Booking>.Filter.Eq(b => b.ResourceId, resourceId),
+                Builders<Booking>.Filter.Eq(b => b.Date, targetDate)
+            );
+
+            return await _bookings.Find(filter).ToListAsync();
+        }
+
         public async Task Create([FromBody] Booking entity)
         {
             if (!string.IsNullOrWhiteSpace(entity.Id))

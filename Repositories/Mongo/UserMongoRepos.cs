@@ -63,7 +63,10 @@ namespace ResourceBookingAPI.Repositories.Mongo
             if (entity.Username != null)
                 updateDefinitions.Add(Builders<User>.Update.Set(u => u.Username, entity.Username));
             if (entity.Password != null)
+            {
+                entity.Password = _passwordHasher.HashPassword(entity, entity.Password);
                 updateDefinitions.Add(Builders<User>.Update.Set(u => u.Password, entity.Password));
+            }
             
             updateDefinitions.Add(Builders<User>.Update.Set(u => u.Name, entity.Name));
             updateDefinitions.Add(Builders<User>.Update.Set(u => u.Email, entity.Email));

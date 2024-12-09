@@ -7,5 +7,7 @@ namespace ResourceBookingAPI.Interfaces.Repositories
         ICrudRepos<Booking, string>
     {
         Task<IEnumerable<Booking>> GetAllWithinDates(DateTime startDate, DateTime endDate, string institutionId);
+        Task<IEnumerable<Booking>> GetAllPending(string userId, DateTime currentDate);
+        Task<IEnumerable<Booking>> GetAllResourceBookings(string resourceId, DateTime searchDate);
     }
 }
