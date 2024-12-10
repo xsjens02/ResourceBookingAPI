@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using ResourceBookingAPI.Interfaces.Repositories;
 using ResourceBookingAPI.Interfaces.Repositories.CRUD;
 using ResourceBookingAPI.Interfaces.Services;
 using ResourceBookingAPI.Models;
@@ -10,7 +11,7 @@ namespace ResourceBookingAPI.Repositories.Mongo
     /// Repository for managing ErrorReport entities in a MongoDB database.
     /// Implements CRUD operations for ErrorReports.
     /// </summary>
-    public class ErrorReportMongoRepos : ICrudRepos<ErrorReport, string>
+    public class ErrorReportMongoRepos : IErrorReportRepos
     {
         private readonly IMongoCollection<ErrorReport> _errorReports;
 
@@ -34,14 +35,30 @@ namespace ResourceBookingAPI.Repositories.Mongo
         }
 
         /// <summary>
-        /// Retrieves all error reports for a specific resource.
+        /// Retrieves all error reports for a specified institution.
         /// </summary>
-        /// <param name="resourceId">The ID of the resource associated with the error reports.</param>
-        /// <returns>A list of error reports for the specified resource.</returns>
-        public async Task<IEnumerable<ErrorReport>> GetAll([FromQuery] string resourceId)
+        /// <param name="institutionId">The ID of the institution whose error reports are to be retrieved.</param>
+        /// <returns>A list of error reports for the specified institution.</returns>
+        public async Task<IEnumerable<ErrorReport>> GetAll([FromQuery] string institutionId)
         {
-            var filter = Builders<ErrorReport>.Filter.Eq(e => e.ResourceId, resourceId);
+            var filter = Builders<ErrorReport>.Filter.Eq(e => e.InstitutionId, institutionId);
             return await _errorReports.Find(filter).ToListAsync();
+        }
+
+        /// <summary>
+        /// Checks if there are any active (unresolved) error reports for a specific resource.
+        /// </summary>
+        /// <param name="resourceId">The ID of the resource to check for active error reports.</param>
+        /// <returns>True if there are active error reports for the specified resource; otherwise, false.</returns>
+        public async Task<bool> AnyActive(string resourceId)
+        {
+            var filter = Builders<ErrorReport>.Filter.And(
+                Builders<ErrorReport>.Filter.Eq(e => e.ResourceId, resourceId),
+                Builders<ErrorReport>.Filter.Eq(e => e.Resolved, false)
+            );
+
+            var exists = await _errorReports.Find(filter).AnyAsync();
+            return exists;
         }
 
         /// <summary>

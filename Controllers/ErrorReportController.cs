@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ResourceBookingAPI.Interfaces.Controllers;
 using ResourceBookingAPI.Interfaces.Controllers.CRUD;
+using ResourceBookingAPI.Interfaces.Repositories;
 using ResourceBookingAPI.Interfaces.Repositories.CRUD;
 using ResourceBookingAPI.Models;
 
@@ -13,15 +15,15 @@ namespace ResourceBookingAPI.Controllers
     [ApiController]
     [Route("api/error-reports")]
     [Authorize]
-    public class ErrorReportController : ControllerBase, ICrudController<ErrorReport, string>
+    public class ErrorReportController : ControllerBase, IErrorReportController
     {
-        private readonly ICrudRepos<ErrorReport, string> _errorReportRepo;
+        private readonly IErrorReportRepos _errorReportRepo;
 
         /// <summary>
         /// Initializes the ErrorReportController with a repository for interacting with error reports.
         /// </summary>
         /// <param name="errorReportRepo">The repository used to manage error reports.</param>
-        public ErrorReportController(ICrudRepos<ErrorReport, string> errorReportRepo)
+        public ErrorReportController(IErrorReportRepos errorReportRepo)
         {
             _errorReportRepo = errorReportRepo;
         }
@@ -45,18 +47,37 @@ namespace ResourceBookingAPI.Controllers
         }
 
         /// <summary>
-        /// Retrieves all error reports for a specific resource.
+        /// Retrieves all error reports for a specified institution.
         /// </summary>
-        /// <param name="resourceId">The resource ID used to filter error reports.</param>
-        /// <returns>An IActionResult containing the list of error reports for the resource.</returns>
+        /// <param name="institutionId">The ID of the institution whose error reports are to be retrieved.</param>
+        /// <returns>An IActionResult containing the list of error reports for the institution.</returns>
         [HttpGet("all")]
-        public async Task<IActionResult> GetAll([FromQuery] string resourceId)
+        public async Task<IActionResult> GetAll([FromQuery] string institutionId)
         {
-            if (string.IsNullOrWhiteSpace(resourceId))
+            if (string.IsNullOrWhiteSpace(institutionId))
+                return BadRequest("InstitutionId cannot be null");
+
+            var errorReports = await _errorReportRepo.GetAll(institutionId);
+            return Ok(errorReports);
+        }
+
+        /// <summary>
+        /// Checks whether there are any active (unresolved) error reports for a specific resource.
+        /// </summary>
+        /// <param name="reosourceId">The ID of the resource to check for active error reports.</param>
+        /// <returns>
+        /// An IActionResult containing a boolean value:
+        /// - `true` if there are active error reports for the specified resource.
+        /// - `false` if no active error reports exist.
+        /// </returns>
+        [HttpGet("active")]
+        public async Task<IActionResult> GetResoureStatus([FromQuery] string reosourceId)
+        {
+            if (string.IsNullOrWhiteSpace(reosourceId))
                 return BadRequest("ResourceId cannot be null");
 
-            var errorReports = await _errorReportRepo.GetAll(resourceId);
-            return Ok(errorReports);
+            var activeReports = await _errorReportRepo.AnyActive(reosourceId);
+            return Ok(activeReports);
         }
 
         /// <summary>

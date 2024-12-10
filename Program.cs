@@ -82,7 +82,7 @@ namespace ResourceBookingAPI
 
             // Register repositories for accessing the MongoDB collections
             builder.Services.AddSingleton<IBookingRepos, BookingMongoRepos>();
-            builder.Services.AddSingleton<ICrudRepos<ErrorReport, string>, ErrorReportMongoRepos>();
+            builder.Services.AddSingleton<IErrorReportRepos, ErrorReportMongoRepos>();
             builder.Services.AddSingleton<IInstitutionRepos, InstitutionMongoRepos>();
             builder.Services.AddSingleton<ICrudRepos<Resource, string>, ResourceMongoRepos>();
             builder.Services.AddSingleton<ICrudRepos<User, string>, UserMongoRepos>();

@@ -8,6 +8,9 @@ namespace ResourceBookingAPI.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
+        [BsonElement("institutionId")]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? InstitutionId { get; set; }
 
         [BsonElement("createdDate")]
         public DateTime CreatedDate { get; set; }
