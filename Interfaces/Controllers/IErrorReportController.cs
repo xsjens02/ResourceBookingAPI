@@ -7,6 +7,6 @@ namespace ResourceBookingAPI.Interfaces.Controllers
     public interface IErrorReportController : 
         ICrudController<ErrorReport, string>
     {
-        Task<IActionResult> GetResoureStatus([FromQuery] string reosourceId);
+        Task<IActionResult> GetResourceStatus([FromQuery] string resourceId);
     }
 }

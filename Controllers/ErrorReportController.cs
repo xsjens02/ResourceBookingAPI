@@ -64,19 +64,19 @@ namespace ResourceBookingAPI.Controllers
         /// <summary>
         /// Checks whether there are any active (unresolved) error reports for a specific resource.
         /// </summary>
-        /// <param name="reosourceId">The ID of the resource to check for active error reports.</param>
+        /// <param name="resourceId">The ID of the resource to check for active error reports.</param>
         /// <returns>
         /// An IActionResult containing a boolean value:
         /// - `true` if there are active error reports for the specified resource.
         /// - `false` if no active error reports exist.
         /// </returns>
         [HttpGet("active")]
-        public async Task<IActionResult> GetResoureStatus([FromQuery] string reosourceId)
+        public async Task<IActionResult> GetResourceStatus([FromQuery] string resourceId)
         {
-            if (string.IsNullOrWhiteSpace(reosourceId))
+            if (string.IsNullOrWhiteSpace(resourceId))
                 return BadRequest("ResourceId cannot be null");
 
-            var activeReports = await _errorReportRepo.AnyActive(reosourceId);
+            var activeReports = await _errorReportRepo.AnyActive(resourceId);
             return Ok(activeReports);
         }
 
