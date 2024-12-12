@@ -69,12 +69,20 @@ namespace ResourceBookingAPI.Repositories.Mongo
         /// <returns>A list of pending bookings for the user.</returns>
         public async Task<IEnumerable<Booking>> GetAllPending(string userId, DateTime currentDate)
         {
+            currentDate = currentDate.Date; 
             var filter = Builders<Booking>.Filter.And(
-                Builders<Booking>.Filter.Eq(b => b.UserId, userId),          
-                Builders<Booking>.Filter.Gte(b => b.Date, currentDate)      
+                Builders<Booking>.Filter.Eq(b => b.UserId, userId),
+                Builders<Booking>.Filter.Gte(b => b.Date, currentDate)
             );
 
-            return await _bookings.Find(filter).ToListAsync();
+            var bookings = await _bookings.Find(filter).ToListAsync();
+
+            var sortedBookings = bookings
+                .OrderBy(b => b.Date)
+                .ThenBy(b => TimeSpan.Parse(b.StartTime!)) 
+                .ToList();
+
+            return sortedBookings;
         }
 
         /// <summary>
