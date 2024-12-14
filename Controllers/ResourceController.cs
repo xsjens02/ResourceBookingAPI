@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ResourceBookingAPI.Interfaces.Controllers.CRUD;
-using ResourceBookingAPI.Interfaces.Repositories.CRUD;
+using ResourceBookingAPI.Interfaces.Controllers;
+using ResourceBookingAPI.Interfaces.Managers;
 using ResourceBookingAPI.Models;
 
 namespace ResourceBookingAPI.Controllers
@@ -13,17 +13,17 @@ namespace ResourceBookingAPI.Controllers
     [ApiController]
     [Route("api/resources")]
     [Authorize]
-    public class ResourceController : ControllerBase, ICrudController<Resource, string>
+    public class ResourceController : ControllerBase, IResourceController
     {
-        private readonly ICrudRepos<Resource, string> _resourceRepo;
+        private readonly IResourceManager _resourceManager;
 
         /// <summary>
-        /// Initializes the ResourceController with the resource repository for managing resources.
+        /// Initializes the ResourceController with the resource manager for managing resources.
         /// </summary>
-        /// <param name="resourceRepo">The repository used for CRUD operations on resources.</param>
-        public ResourceController(ICrudRepos<Resource, string> resourceRepo)
+        /// <param name="resourceRepo">The manager used for CRUD operations on resources.</param>
+        public ResourceController(IResourceManager resourceManager)
         {
-            _resourceRepo = resourceRepo;
+            this._resourceManager = resourceManager;
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
 
-            var resource = await _resourceRepo.Get(id);
+            var resource = await _resourceManager.Get(id);
             if (resource == null)
                 return NotFound($"No resource found with Id:{id}");
 
@@ -55,7 +55,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(institutionId))
                 return BadRequest("InstitutionId cannot be null");
 
-            var resources = await _resourceRepo.GetAll(institutionId);
+            var resources = await _resourceManager.GetAll(institutionId);
             return Ok(resources);
         }
 
@@ -66,14 +66,14 @@ namespace ResourceBookingAPI.Controllers
         /// <returns>An IActionResult indicating the result of the create operation.</returns>
         [HttpPost]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> Create([FromBody] Resource entity)
+        public async Task<IActionResult> Post([FromBody] Resource entity)
         {
             if (entity == null)
                 return BadRequest("Resource entity cannot be null");
 
             try
             {
-                await _resourceRepo.Create(entity);
+                await _resourceManager.Create(entity);
                 return CreatedAtAction(nameof(Get), new { id = entity.Id }, entity);
             }
             catch (Exception ex)
@@ -90,7 +90,7 @@ namespace ResourceBookingAPI.Controllers
         /// <returns>An IActionResult indicating the result of the update operation.</returns>
         [HttpPut("{id}")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> Update(string id, [FromBody] Resource entity)
+        public async Task<IActionResult> Put(string id, [FromBody] Resource entity)
         {
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
@@ -98,7 +98,7 @@ namespace ResourceBookingAPI.Controllers
             if (entity == null)
                 return BadRequest("Resource entity cannot be null");
 
-            var succes = await _resourceRepo.Update(id, entity);
+            var succes = await _resourceManager.Update(id, entity);
             if (succes)
                 return NoContent();
 
@@ -117,7 +117,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
 
-            var succes = await _resourceRepo.Delete(id);
+            var succes = await _resourceManager.Delete(id);
             if (succes)
                 return NoContent();
 

@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using ResourceBookingAPI.Configuration;
+using ResourceBookingAPI.Interfaces.Managers;
 using ResourceBookingAPI.Interfaces.Repositories;
-using ResourceBookingAPI.Interfaces.Repositories.CRUD;
 using ResourceBookingAPI.Interfaces.Services;
-using ResourceBookingAPI.Models;
+using ResourceBookingAPI.Managers;
 using ResourceBookingAPI.Repositories.Mongo;
 using ResourceBookingAPI.Services;
 using System.Text;
@@ -84,9 +84,17 @@ namespace ResourceBookingAPI
             builder.Services.AddSingleton<IBookingRepos, BookingMongoRepos>();
             builder.Services.AddSingleton<IErrorReportRepos, ErrorReportMongoRepos>();
             builder.Services.AddSingleton<IInstitutionRepos, InstitutionMongoRepos>();
-            builder.Services.AddSingleton<ICrudRepos<Resource, string>, ResourceMongoRepos>();
-            builder.Services.AddSingleton<ICrudRepos<User, string>, UserMongoRepos>();
-            builder.Services.AddSingleton<ILoginRepos, UserMongoRepos>();
+            builder.Services.AddSingleton<IResourceRepos, ResourceMongoRepos>();
+            builder.Services.AddSingleton<IUserRepos, UserMongoRepos>();
+            builder.Services.AddSingleton<ICdnService, GitHubCdnService>();
+
+            // Register services 
+            builder.Services.AddSingleton<IBookingManager, BookingManager>();
+            builder.Services.AddSingleton<IErrorReportManager, ErrorReportManager>();
+            builder.Services.AddSingleton<IInstitutionManager, InstitutionManager>();
+            builder.Services.AddSingleton<IResourceManager, ResourceManager>();
+            builder.Services.AddSingleton<IUserManager, UserManager>();
+            builder.Services.AddSingleton<IImageManager, ImageManager>();
 
             // Build the application
             var app = builder.Build();

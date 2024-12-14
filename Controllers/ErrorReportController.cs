@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ResourceBookingAPI.Interfaces.Controllers;
-using ResourceBookingAPI.Interfaces.Controllers.CRUD;
-using ResourceBookingAPI.Interfaces.Repositories;
-using ResourceBookingAPI.Interfaces.Repositories.CRUD;
+using ResourceBookingAPI.Interfaces.Managers;
 using ResourceBookingAPI.Models;
 
 namespace ResourceBookingAPI.Controllers
@@ -17,15 +15,15 @@ namespace ResourceBookingAPI.Controllers
     [Authorize]
     public class ErrorReportController : ControllerBase, IErrorReportController
     {
-        private readonly IErrorReportRepos _errorReportRepo;
+        private readonly IErrorReportManager _errorReportManager;
 
         /// <summary>
-        /// Initializes the ErrorReportController with a repository for interacting with error reports.
+        /// Initializes the ErrorReportController with a manager for interacting with error reports.
         /// </summary>
-        /// <param name="errorReportRepo">The repository used to manage error reports.</param>
-        public ErrorReportController(IErrorReportRepos errorReportRepo)
+        /// <param name="errorReportRepo">The manager used to manage error reports.</param>
+        public ErrorReportController(IErrorReportManager errorReportManager)
         {
-            _errorReportRepo = errorReportRepo;
+            this._errorReportManager = errorReportManager;
         }
 
         /// <summary>
@@ -39,7 +37,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
 
-            var errorReport = await _errorReportRepo.Get(id);
+            var errorReport = await _errorReportManager.Get(id);
             if (errorReport == null)
                 return NotFound($"No error report found with Id:{id}");
 
@@ -57,7 +55,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(institutionId))
                 return BadRequest("InstitutionId cannot be null");
 
-            var errorReports = await _errorReportRepo.GetAll(institutionId);
+            var errorReports = await _errorReportManager.GetAll(institutionId);
             return Ok(errorReports);
         }
 
@@ -76,7 +74,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(resourceId))
                 return BadRequest("ResourceId cannot be null");
 
-            var activeReports = await _errorReportRepo.AnyActive(resourceId);
+            var activeReports = await _errorReportManager.AnyActiveOnResource(resourceId);
             return Ok(activeReports);
         }
 
@@ -86,14 +84,14 @@ namespace ResourceBookingAPI.Controllers
         /// <param name="entity">The error report entity to create.</param>
         /// <returns>An IActionResult indicating the result of the creation operation.</returns>
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ErrorReport entity)
+        public async Task<IActionResult> Post([FromBody] ErrorReport entity)
         {
             if (entity == null)
                 return BadRequest("Error report entity cannot be null");
 
             try
             {
-                await _errorReportRepo.Create(entity);
+                await _errorReportManager.Create(entity);
                 return CreatedAtAction(nameof(Get), new { id = entity.Id }, entity);
             }
             catch (Exception ex)
@@ -111,7 +109,7 @@ namespace ResourceBookingAPI.Controllers
         /// <returns>An IActionResult indicating the result of the update operation.</returns>
         [HttpPut("{id}")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> Update(string id, [FromBody] ErrorReport entity)
+        public async Task<IActionResult> Put(string id, [FromBody] ErrorReport entity)
         {
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
@@ -119,7 +117,7 @@ namespace ResourceBookingAPI.Controllers
             if (entity == null)
                 return BadRequest("Error report entity cannot be null");
 
-            var success = await _errorReportRepo.Update(id, entity);
+            var success = await _errorReportManager.Update(id, entity);
             if (success)
                 return NoContent();
 
@@ -139,7 +137,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
 
-            var success = await _errorReportRepo.Delete(id);
+            var success = await _errorReportManager.Delete(id);
             if (success)
                 return NoContent();
 

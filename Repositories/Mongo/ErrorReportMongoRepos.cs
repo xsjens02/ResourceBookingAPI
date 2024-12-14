@@ -1,71 +1,59 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using ResourceBookingAPI.Interfaces.Repositories;
-using ResourceBookingAPI.Interfaces.Repositories.CRUD;
 using ResourceBookingAPI.Interfaces.Services;
 using ResourceBookingAPI.Models;
 
 namespace ResourceBookingAPI.Repositories.Mongo
 {
     /// <summary>
-    /// Repository for managing ErrorReport entities in a MongoDB database.
-    /// Implements CRUD operations for ErrorReports.
+    /// ErrorReportMongoRepos is responsible for interacting with the MongoDB database
+    /// to perform CRUD operations for error report entities. It utilizes the MongoDB
+    /// driver to access the "errorreports" collection and manage error report data.
     /// </summary>
     public class ErrorReportMongoRepos : IErrorReportRepos
     {
+        /// <summary>
+        /// The MongoDB collection used to access error report data.
+        /// </summary>
         private readonly IMongoCollection<ErrorReport> _errorReports;
 
         /// <summary>
-        /// Initializes the ErrorReport repository with a MongoDB collection.
+        /// Initializes a new instance of the ErrorReportMongoRepos class.
         /// </summary>
-        /// <param name="mongoService">Service for accessing MongoDB.</param>
+        /// <param name="mongoService">The MongoDB service to provide access to the "errorreports" collection.</param>
         public ErrorReportMongoRepos(IMongoService mongoService)
         {
             _errorReports = mongoService.GetCollection<ErrorReport>("errorreports");
         }
 
         /// <summary>
-        /// Retrieves a single error report by its unique ID.
+        /// Retrieves an error report by its unique identifier.
         /// </summary>
-        /// <param name="id">The ID of the error report to retrieve.</param>
-        /// <returns>The matching ErrorReport or null if not found.</returns>
-        public async Task<ErrorReport> Get(string id)
+        /// <param name="id">The unique identifier of the error report to retrieve.</param>
+        /// <returns>The requested error report entity or null if not found.</returns>
+        public async Task<ErrorReport> Read(string id)
         {
             return await _errorReports.Find(e => e.Id == id).FirstOrDefaultAsync();
         }
 
         /// <summary>
-        /// Retrieves all error reports for a specified institution.
+        /// Retrieves all error reports associated with a specific institution.
         /// </summary>
-        /// <param name="institutionId">The ID of the institution whose error reports are to be retrieved.</param>
-        /// <returns>A list of error reports for the specified institution.</returns>
-        public async Task<IEnumerable<ErrorReport>> GetAll([FromQuery] string institutionId)
+        /// <param name="institutionId">The unique identifier of the institution whose error reports to retrieve.</param>
+        /// <returns>A collection of error reports associated with the institution.</returns>
+        public async Task<IEnumerable<ErrorReport>> ReadAll(string institutionId)
         {
             var filter = Builders<ErrorReport>.Filter.Eq(e => e.InstitutionId, institutionId);
             return await _errorReports.Find(filter).ToListAsync();
         }
 
         /// <summary>
-        /// Checks if there are any active (unresolved) error reports for a specific resource.
-        /// </summary>
-        /// <param name="resourceId">The ID of the resource to check for active error reports.</param>
-        /// <returns>True if there are active error reports for the specified resource; otherwise, false.</returns>
-        public async Task<bool> AnyActive(string resourceId)
-        {
-            var filter = Builders<ErrorReport>.Filter.And(
-                Builders<ErrorReport>.Filter.Eq(e => e.ResourceId, resourceId),
-                Builders<ErrorReport>.Filter.Eq(e => e.Resolved, false)
-            );
-
-            var exists = await _errorReports.Find(filter).AnyAsync();
-            return exists;
-        }
-
-        /// <summary>
         /// Creates a new error report in the database.
+        /// If the error report already has an ID, it is set to null before insertion.
         /// </summary>
-        /// <param name="entity">The ErrorReport entity to be created.</param>
-        public async Task Create([FromBody] ErrorReport entity)
+        /// <param name="entity">The error report entity to be created.</param>
+        /// <returns>A task representing the asynchronous create operation.</returns>
+        public async Task Create(ErrorReport entity)
         {
             if (!string.IsNullOrWhiteSpace(entity.Id))
                 entity.Id = null;
@@ -74,12 +62,12 @@ namespace ResourceBookingAPI.Repositories.Mongo
         }
 
         /// <summary>
-        /// Updates an existing error report by its ID.
+        /// Updates an existing error report identified by its unique identifier.
         /// </summary>
-        /// <param name="id">The ID of the error report to update.</param>
-        /// <param name="entity">The updated ErrorReport entity.</param>
-        /// <returns>True if the update was successful; otherwise, false.</returns>
-        public async Task<bool> Update(string id, [FromBody] ErrorReport entity)
+        /// <param name="id">The unique identifier of the error report to update.</param>
+        /// <param name="entity">The updated error report entity.</param>
+        /// <returns>A boolean indicating whether the update was successful.</returns>
+        public async Task<bool> Update(string id, ErrorReport entity)
         {
             entity.Id = id;
 
@@ -89,15 +77,26 @@ namespace ResourceBookingAPI.Repositories.Mongo
         }
 
         /// <summary>
-        /// Deletes an error report by its ID.
+        /// Deletes an error report by its unique identifier.
         /// </summary>
-        /// <param name="id">The ID of the error report to delete.</param>
-        /// <returns>True if the deletion was successful; otherwise, false.</returns>
+        /// <param name="id">The unique identifier of the error report to delete.</param>
+        /// <returns>A boolean indicating whether the deletion was successful.</returns>
         public async Task<bool> Delete(string id)
         {
             var filter = Builders<ErrorReport>.Filter.Eq(e => e.Id, id);
             var result = await _errorReports.DeleteOneAsync(filter);
             return result.DeletedCount > 0;
+        }
+
+        /// <summary>
+        /// Retrieves all active error reports associated with a specific resource.
+        /// Active error reports are those that have not been marked as resolved.
+        /// </summary>
+        /// <param name="resourceId">The unique identifier of the resource whose active error reports to retrieve.</param>
+        /// <returns>A collection of active error reports associated with the resource.</returns>
+        public async Task<IEnumerable<ErrorReport>> ReadAllActiveOnResource(string resourceId)
+        {
+            return await _errorReports.Find(e => e.ResourceId == resourceId && !e.Resolved).ToListAsync();
         }
     }
 }

@@ -4,9 +4,9 @@ using ResourceBookingAPI.Models;
 namespace ResourceBookingAPI.Interfaces.Controllers
 {
     public interface IInstitutionController :
-        ICreateController<Institution>,
-        IReadController<string>,
-        IUpdateController<Institution, string>
+        IPostController<Institution>,
+        IGetController<string>,
+        IPutController<Institution, string>
     {
     }
 }

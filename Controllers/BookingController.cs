@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ResourceBookingAPI.DTOs;
 using ResourceBookingAPI.Interfaces.Controllers;
-using ResourceBookingAPI.Interfaces.Repositories;
+using ResourceBookingAPI.Interfaces.Managers;
 using ResourceBookingAPI.Models;
 
 namespace ResourceBookingAPI.Controllers
@@ -16,15 +16,15 @@ namespace ResourceBookingAPI.Controllers
     [Authorize]
     public class BookingController : ControllerBase, IBookingController
     {
-        private readonly IBookingRepos _bookingRepo;
+        private readonly IBookingManager _bookingService;
 
         /// <summary>
-        /// Initializes the BookingController with a repository for interacting with bookings.
+        /// Initializes the BookingController with a manager for interacting with bookings.
         /// </summary>
-        /// <param name="bookingRepo">The repository used to manage bookings.</param>
-        public BookingController(IBookingRepos bookingRepo)
+        /// <param name="bookingRepo">The manager used to manage bookings.</param>
+        public BookingController(IBookingManager bookingManager)
         {
-            _bookingRepo = bookingRepo;
+            this._bookingService = bookingManager;
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
 
-            var booking = await _bookingRepo.Get(id);
+            var booking = await _bookingService.Get(id);
             if (booking == null)
                 return NotFound($"No booking found with Id:{id}");
 
@@ -56,7 +56,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(userId))
                 return BadRequest("UserId cannot be null");
 
-            var bookings = await _bookingRepo.GetAll(userId);
+            var bookings = await _bookingService.GetAll(userId);
             return Ok(bookings);
         }
 
@@ -76,7 +76,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(statRequest.InstitutionId))
                 return BadRequest("InstitutionId cannot be null or empty");
 
-            var bookings = await _bookingRepo.GetAllWithinDates(statRequest.StartDate, statRequest.EndTime, statRequest.InstitutionId);
+            var bookings = await _bookingService.GetStatistics(statRequest.InstitutionId, statRequest.StartDate, statRequest.EndTime);
             return Ok(bookings);
         }
 
@@ -94,7 +94,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(pendingRequest.UserId))
                 return BadRequest("UserId cannot be null or empty");
 
-            var bookings = await _bookingRepo.GetAllPending(pendingRequest.UserId, pendingRequest.CurrentDate);
+            var bookings = await _bookingService.GetPendingUserBookings(pendingRequest.UserId, pendingRequest.CurrentDate);
             return Ok(bookings);
         }
 
@@ -112,7 +112,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(resourceRequest.ResourceId))
                 return BadRequest("ResourceId cannot be null or empty");
 
-            var bookings = await _bookingRepo.GetAllResourceBookings(resourceRequest.ResourceId, resourceRequest.Date);
+            var bookings = await _bookingService.GetResourceBookingsOnDate(resourceRequest.ResourceId, resourceRequest.Date);
             return Ok(bookings);
         }
 
@@ -122,14 +122,14 @@ namespace ResourceBookingAPI.Controllers
         /// <param name="entity">The booking entity to create.</param>
         /// <returns>An IActionResult indicating the result of the creation operation.</returns>
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Booking entity)
+        public async Task<IActionResult> Post([FromBody] Booking entity)
         {
             if (entity == null)
                 return BadRequest("Booking entity cannot be null");
 
             try
             {
-                await _bookingRepo.Create(entity);
+                await _bookingService.Create(entity);
                 return CreatedAtAction(nameof(Get), new { id = entity.Id }, entity);
             }
             catch (Exception ex)
@@ -145,7 +145,7 @@ namespace ResourceBookingAPI.Controllers
         /// <param name="entity">The updated booking entity.</param>
         /// <returns>An IActionResult indicating the result of the update operation.</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] Booking entity)
+        public async Task<IActionResult> Put(string id, [FromBody] Booking entity)
         {
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
@@ -153,7 +153,7 @@ namespace ResourceBookingAPI.Controllers
             if (entity == null)
                 return BadRequest("Booking entity cannot be null");
 
-            var success = await _bookingRepo.Update(id, entity);
+            var success = await _bookingService.Update(id, entity);
             if (success)
                 return NoContent();
 
@@ -171,7 +171,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
 
-            var success = await _bookingRepo.Delete(id);
+            var success = await _bookingService.Delete(id);
             if (success)
                 return NoContent();
 

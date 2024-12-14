@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ResourceBookingAPI.Interfaces.Controllers;
 using ResourceBookingAPI.Interfaces.Controllers.CRUD;
-using ResourceBookingAPI.Interfaces.Repositories.CRUD;
+using ResourceBookingAPI.Interfaces.Managers;
 using ResourceBookingAPI.Models;
 
 namespace ResourceBookingAPI.Controllers
@@ -11,17 +12,17 @@ namespace ResourceBookingAPI.Controllers
     /// </summary>
     [ApiController]
     [Route("api/users")]
-    public class UserController : ControllerBase, ICrudController<User, string>
+    public class UserController : ControllerBase, IUserController
     {
-        private readonly ICrudRepos<User, string> _userRepo;
+        private readonly IUserManager _userManager;
 
         /// <summary>
-        /// Initializes the UserController with the user repository for managing users.
+        /// Initializes the UserController with the user manager for managing users.
         /// </summary>
-        /// <param name="userRepo">The repository used for CRUD operations on users.</param>
-        public UserController(ICrudRepos<User, string> userRepo)
+        /// <param name="userRepo">The manager used for CRUD operations on users.</param>
+        public UserController(IUserManager userManager)
         {
-            _userRepo = userRepo;
+            this._userManager = userManager;
         }
 
         /// <summary>
@@ -35,7 +36,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
 
-            var user = await _userRepo.Get(id);
+            var user = await _userManager.Get(id);
             if (user == null)
                 return NotFound($"No user found with Id:{id}");
 
@@ -53,7 +54,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(institutionId))
                 return BadRequest("InstitutionId cannot be null");
 
-            var users = await _userRepo.GetAll(institutionId);
+            var users = await _userManager.GetAll(institutionId);
             return Ok(users);
         }
 
@@ -63,14 +64,14 @@ namespace ResourceBookingAPI.Controllers
         /// <param name="entity">The user entity to create.</param>
         /// <returns>An IActionResult indicating the result of the create operation.</returns>
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] User entity)
+        public async Task<IActionResult> Post([FromBody] User entity)
         {
             if (entity == null)
                 return BadRequest("User entity cannot be null");
 
             try
             {
-                await _userRepo.Create(entity);
+                await _userManager.Create(entity);
                 return CreatedAtAction(nameof(Get), new { id = entity.Id }, entity);
             }
             catch (Exception ex)
@@ -86,7 +87,7 @@ namespace ResourceBookingAPI.Controllers
         /// <param name="entity">The updated user entity.</param>
         /// <returns>An IActionResult indicating the result of the update operation.</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] User entity)
+        public async Task<IActionResult> Put(string id, [FromBody] User entity)
         {
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
@@ -94,7 +95,7 @@ namespace ResourceBookingAPI.Controllers
             if (entity == null)
                 return BadRequest("User entity cannot be null");
 
-            var succes = await _userRepo.Update(id, entity);
+            var succes = await _userManager.Update(id, entity);
             if (succes)
                 return NoContent();
 
@@ -112,7 +113,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
 
-            var succes = await _userRepo.Delete(id);
+            var succes = await _userManager.Delete(id);
             if (succes)
                 return NoContent();
 

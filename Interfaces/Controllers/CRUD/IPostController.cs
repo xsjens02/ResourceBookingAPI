@@ -2,8 +2,8 @@
 
 namespace ResourceBookingAPI.Interfaces.Controllers.CRUD
 {
-    public interface ICreateController<T>
+    public interface IPostController<T>
     {
-        Task<IActionResult> Create([FromBody] T entity);
+        Task<IActionResult> Post([FromBody] T entity);
     }
 }

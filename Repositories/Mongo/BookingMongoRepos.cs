@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using ResourceBookingAPI.Interfaces.Repositories;
 using ResourceBookingAPI.Interfaces.Services;
 using ResourceBookingAPI.Models;
@@ -7,67 +6,72 @@ using ResourceBookingAPI.Models;
 namespace ResourceBookingAPI.Repositories.Mongo
 {
     /// <summary>
-    /// Repository for managing Booking entities in a MongoDB database.
-    /// Provides CRUD operations and specific queries for bookings.
+    /// BookingMongoRepos is responsible for interacting with the MongoDB database
+    /// to perform CRUD operations for booking entities. It utilizes the MongoDB
+    /// driver to access the "bookings" collection and manage booking data.
     /// </summary>
     public class BookingMongoRepos : IBookingRepos
     {
+        /// <summary>
+        /// The MongoDB collection used to access booking data.
+        /// </summary>
         private IMongoCollection<Booking> _bookings;
 
         /// <summary>
-        /// Initializes the Booking repository with a MongoDB collection.
+        /// Initializes a new instance of the BookingMongoRepos class.
         /// </summary>
+        /// <param name="mongoService">The MongoDB service to provide access to the "bookings" collection.</param>
         public BookingMongoRepos(IMongoService mongoService)
         {
             _bookings = mongoService.GetCollection<Booking>("bookings");
         }
 
         /// <summary>
-        /// Retrieves a single booking by its unique ID.
+        /// Retrieves a booking by its unique identifier.
         /// </summary>
-        /// <param name="id">The ID of the booking to retrieve.</param>
-        /// <returns>The matching Booking or null if not found.</returns>
-        public async Task<Booking> Get(string id)
+        /// <param name="id">The unique identifier of the booking to retrieve.</param>
+        /// <returns>The requested booking entity or null if not found.</returns>
+        public async Task<Booking> Read(string id)
         {
             return await _bookings.Find(b => b.Id == id).FirstOrDefaultAsync();
         }
 
         /// <summary>
-        /// Retrieves all bookings for a specific user.
+        /// Retrieves all bookings associated with a specific user.
         /// </summary>
-        /// <param name="userId">The ID of the user whose bookings to be retrieved.</param>
-        /// <returns>A list of bookings for the specified user.</returns>
-        public async Task<IEnumerable<Booking>> GetAll([FromQuery] string userId)
+        /// <param name="userId">The unique identifier of the user whose bookings to retrieve.</param>
+        /// <returns>A collection of bookings associated with the user.</returns>
+        public async Task<IEnumerable<Booking>> ReadAll(string userId)
         {
             var filter = Builders<Booking>.Filter.Eq(b => b.UserId, userId);
             return await _bookings.Find(filter).ToListAsync();
         }
 
         /// <summary>
-        /// Retrieves all bookings within a specified date range and institution.
+        /// Retrieves all bookings associated with a specific institution within a date range.
         /// </summary>
-        /// <param name="startDate">Start date of the range.</param>
-        /// <param name="endDate">End date of the range.</param>
-        /// <param name="institutionId">ID of the institution.</param>
-        /// <returns>A list of bookings that match the criteria.</returns>
-        public async Task<IEnumerable<Booking>> GetAllWithinDates(DateTime startDate, DateTime endDate, string institutionId)
+        /// <param name="institutionId">The unique identifier of the institution whose bookings to retrieve.</param>
+        /// <param name="startDate">The start date of the date range.</param>
+        /// <param name="endDate">The end date of the date range.</param>
+        /// <returns>A collection of bookings associated with the institution within the date range.</returns>
+        public async Task<IEnumerable<Booking>> GetOnInstitutionByDateRange(string institutionId, DateTime startDate, DateTime endDate)
         {
             var filter = Builders<Booking>.Filter.And(
-                Builders<Booking>.Filter.Eq(b => b.InstitutionId, institutionId),  
-                Builders<Booking>.Filter.Gte(b => b.Date, startDate),               
-                Builders<Booking>.Filter.Lte(b => b.Date, endDate)                   
+                Builders<Booking>.Filter.Eq(b => b.InstitutionId, institutionId),
+                Builders<Booking>.Filter.Gte(b => b.Date, startDate),
+                Builders<Booking>.Filter.Lte(b => b.Date, endDate)
              );
 
             return await _bookings.Find(filter).ToListAsync();
         }
 
         /// <summary>
-        /// Retrieves all pending bookings for a user from the current date onward.
+        /// Retrieves all bookings for a specific user on or after a given date.
         /// </summary>
-        /// <param name="userId">The ID of the user.</param>
-        /// <param name="currentDate">The current date to filter bookings.</param>
-        /// <returns>A list of pending bookings for the user.</returns>
-        public async Task<IEnumerable<Booking>> GetAllPending(string userId, DateTime currentDate)
+        /// <param name="userId">The unique identifier of the user whose bookings to retrieve.</param>
+        /// <param name="currentDate">The current date for filtering bookings.</param>
+        /// <returns>A collection of bookings for the user by date.</returns>
+        public async Task<IEnumerable<Booking>> GetOnUserByDate(string userId, DateTime currentDate)
         {
             currentDate = currentDate.Date; 
             var filter = Builders<Booking>.Filter.And(
@@ -75,25 +79,18 @@ namespace ResourceBookingAPI.Repositories.Mongo
                 Builders<Booking>.Filter.Gte(b => b.Date, currentDate)
             );
 
-            var bookings = await _bookings.Find(filter).ToListAsync();
-
-            var sortedBookings = bookings
-                .OrderBy(b => b.Date)
-                .ThenBy(b => TimeSpan.Parse(b.StartTime!)) 
-                .ToList();
-
-            return sortedBookings;
+            return await _bookings.Find(filter).ToListAsync();
         }
 
         /// <summary>
         /// Retrieves all bookings for a specific resource on a given date.
         /// </summary>
-        /// <param name="resourceId">The ID of the resource.</param>
-        /// <param name="searchDate">The date to search for bookings.</param>
-        /// <returns>A list of bookings for the resource on the specified date.</returns>
-        public async Task<IEnumerable<Booking>> GetAllResourceBookings(string resourceId, DateTime searchDate)
+        /// <param name="resourceId">The unique identifier of the resource whose bookings to retrieve.</param>
+        /// <param name="searchDate">The date for filtering bookings.</param>
+        /// <returns>A collection of bookings for the resource on the specified date.</returns>
+        public async Task<IEnumerable<Booking>> GetOnResourceByDate(string resourceId, DateTime searchDate)
         {
-            var targetDate = searchDate.Date;
+            var targetDate = searchDate.Date; 
 
             var filter = Builders<Booking>.Filter.And(
                 Builders<Booking>.Filter.Eq(b => b.ResourceId, resourceId),
@@ -105,9 +102,11 @@ namespace ResourceBookingAPI.Repositories.Mongo
 
         /// <summary>
         /// Creates a new booking in the database.
+        /// If the booking already has an ID, it is set to null before insertion.
         /// </summary>
-        /// <param name="entity">The booking to be created.</param>
-        public async Task Create([FromBody] Booking entity)
+        /// <param name="entity">The booking entity to be created.</param>
+        /// <returns>A task representing the asynchronous create operation.</returns>
+        public async Task Create(Booking entity)
         {
             if (!string.IsNullOrWhiteSpace(entity.Id))
                 entity.Id = null;
@@ -116,12 +115,12 @@ namespace ResourceBookingAPI.Repositories.Mongo
         }
 
         /// <summary>
-        /// Updates an existing booking by its ID.
+        /// Updates an existing booking identified by its unique identifier.
         /// </summary>
-        /// <param name="id">The ID of the booking to update.</param>
+        /// <param name="id">The unique identifier of the booking to update.</param>
         /// <param name="entity">The updated booking entity.</param>
-        /// <returns>True if the update was successful; otherwise, false.</returns>
-        public async Task<bool> Update(string id, [FromBody] Booking entity)
+        /// <returns>A boolean indicating whether the update was successful.</returns>
+        public async Task<bool> Update(string id, Booking entity)
         {
             entity.Id = id;
 
@@ -131,10 +130,10 @@ namespace ResourceBookingAPI.Repositories.Mongo
         }
 
         /// <summary>
-        /// Deletes a booking by its ID.
+        /// Deletes a booking by its unique identifier.
         /// </summary>
-        /// <param name="id">The ID of the booking to delete.</param>
-        /// <returns>True if the deletion was successful; otherwise, false.</returns>
+        /// <param name="id">The unique identifier of the booking to delete.</param>
+        /// <returns>A boolean indicating whether the deletion was successful.</returns>
         public async Task<bool> Delete(string id)
         {
             var filter = Builders<Booking>.Filter.Eq(b => b.Id, id);

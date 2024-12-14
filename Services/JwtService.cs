@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using ResourceBookingAPI.Configuration;
 using ResourceBookingAPI.DTOs;
+using ResourceBookingAPI.Interfaces.Managers;
 using ResourceBookingAPI.Interfaces.Repositories;
 using ResourceBookingAPI.Interfaces.Services;
 using System.IdentityModel.Tokens.Jwt;
@@ -16,17 +17,17 @@ namespace ResourceBookingAPI.Services
     public class JwtService : IJwtService
     {
         private readonly JwtConfig _jwtConfig;
-        private readonly ILoginRepos _userRepo;
+        private readonly IUserManager _userService;
 
         /// <summary>
-        /// Initializes the JwtService with configuration and user repository.
+        /// Initializes the JwtService with configuration and user service.
         /// </summary>
         /// <param name="jwtConfig">The JWT configuration settings.</param>
-        /// <param name="userRepo">The repository for user data and validation.</param>
-        public JwtService(IOptions<JwtConfig> jwtConfig, ILoginRepos userRepo)
+        /// <param name="userRepo">The service for user data and validation.</param>
+        public JwtService(IOptions<JwtConfig> jwtConfig, IUserManager userService)
         {
-            _jwtConfig = jwtConfig.Value;
-            _userRepo = userRepo;
+            this._jwtConfig = jwtConfig.Value;
+            this._userService = userService;
         }
 
         /// <summary>
@@ -39,8 +40,8 @@ namespace ResourceBookingAPI.Services
             if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
                 return null;
 
-            var user = await _userRepo.FetchUser(request.Username);
-            if (user == null || !_userRepo.ValidatePassword(user, request.Password))
+            var user = await _userService.GetUserFromUsername(request.Username);
+            if (user == null || !_userService.ValidatePassword(user, request.Password))
                 return null;
 
             var tokenExpiryTimeStamp = DateTime.UtcNow.AddMinutes(_jwtConfig.TokenValidityMins);

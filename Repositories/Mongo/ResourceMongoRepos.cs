@@ -1,44 +1,46 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
-using ResourceBookingAPI.Interfaces.Repositories.CRUD;
+﻿using MongoDB.Driver;
+using ResourceBookingAPI.Interfaces.Repositories;
 using ResourceBookingAPI.Interfaces.Services;
 using ResourceBookingAPI.Models;
 
 namespace ResourceBookingAPI.Repositories.Mongo
 {
     /// <summary>
-    /// Repository for managing Resource entities in a MongoDB database.
-    /// Implements basic CRUD operations for handling resources.
+    /// ResourceMongoRepos is responsible for performing CRUD operations on the "resources" collection in MongoDB.
+    /// It interacts with MongoDB to manage resource entities.
     /// </summary>
-    public class ResourceMongoRepos : ICrudRepos<Resource, string>
+    public class ResourceMongoRepos : IResourceRepos
     {
+        /// <summary>
+        /// The MongoDB collection used to access resource data.
+        /// </summary>
         private readonly IMongoCollection<Resource> _resources;
 
         /// <summary>
-        /// Initializes the Resource repository with a MongoDB collection.
+        /// Initializes a new instance of the ResourceMongoRepos class.
         /// </summary>
-        /// <param name="mongoService">Service for accessing MongoDB.</param>
+        /// <param name="mongoService">The MongoDB service used to access the "resources" collection.</param>
         public ResourceMongoRepos(IMongoService mongoService)
         {
             _resources = mongoService.GetCollection<Resource>("resources");
         }
 
         /// <summary>
-        /// Retrieves a single resource by its unique ID.
+        /// Retrieves a resource by its unique identifier.
         /// </summary>
-        /// <param name="id">The ID of the resource to retrieve.</param>
-        /// <returns>The matching Resource or null if not found.</returns>
-        public async Task<Resource> Get(string id)
+        /// <param name="id">The unique identifier of the resource to retrieve.</param>
+        /// <returns>The requested resource entity or null if not found.</returns>
+        public async Task<Resource> Read(string id)
         {
             return await _resources.Find(r => r.Id == id).FirstOrDefaultAsync();
         }
 
         /// <summary>
-        /// Retrieves all resources for a given institution ID.
+        /// Retrieves all resources associated with a specific institution.
         /// </summary>
-        /// <param name="institutionId">The ID of the institution to filter resources by.</param>
-        /// <returns>A list of resources belonging to the specified institution.</returns>
-        public async Task<IEnumerable<Resource>> GetAll([FromQuery] string institutionId)
+        /// <param name="institutionId">The unique identifier of the institution to filter resources by.</param>
+        /// <returns>A collection of resources associated with the specified institution.</returns>
+        public async Task<IEnumerable<Resource>> ReadAll(string institutionId)
         {
             var filter = Builders<Resource>.Filter.Eq(r => r.InstitutionId, institutionId);
             return await _resources.Find(filter).ToListAsync();
@@ -46,9 +48,11 @@ namespace ResourceBookingAPI.Repositories.Mongo
 
         /// <summary>
         /// Creates a new resource in the database.
+        /// If the resource already has an ID, it is set to null before insertion.
         /// </summary>
-        /// <param name="entity">The Resource entity to be created.</param>
-        public async Task Create([FromBody] Resource entity)
+        /// <param name="entity">The resource entity to be created.</param>
+        /// <returns>A task representing the asynchronous create operation.</returns>
+        public async Task Create(Resource entity)
         {
             if (!string.IsNullOrWhiteSpace(entity.Id))
                 entity.Id = null;
@@ -57,12 +61,12 @@ namespace ResourceBookingAPI.Repositories.Mongo
         }
 
         /// <summary>
-        /// Updates an existing resource by its ID.
+        /// Updates an existing resource identified by its unique identifier.
         /// </summary>
-        /// <param name="id">The ID of the resource to update.</param>
-        /// <param name="entity">The updated Resource entity.</param>
-        /// <returns>True if the update was successful; otherwise, false.</returns>
-        public async Task<bool> Update(string id, [FromBody] Resource entity)
+        /// <param name="id">The unique identifier of the resource to update.</param>
+        /// <param name="entity">The updated resource entity.</param>
+        /// <returns>A boolean indicating whether the update was successful.</returns>
+        public async Task<bool> Update(string id, Resource entity)
         {
             entity.Id = id;
 
@@ -72,10 +76,10 @@ namespace ResourceBookingAPI.Repositories.Mongo
         }
 
         /// <summary>
-        /// Deletes a resource by its unique ID.
+        /// Deletes a resource from the database by its unique identifier.
         /// </summary>
-        /// <param name="id">The ID of the resource to delete.</param>
-        /// <returns>True if the deletion was successful; otherwise, false.</returns>
+        /// <param name="id">The unique identifier of the resource to delete.</param>
+        /// <returns>A boolean indicating whether the delete operation was successful.</returns>
         public async Task<bool> Delete(string id)
         {
             var filter = Builders<Resource>.Filter.Eq(r => r.Id, id);

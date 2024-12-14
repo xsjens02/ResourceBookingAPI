@@ -6,6 +6,6 @@ namespace ResourceBookingAPI.Interfaces.Repositories
     public interface IErrorReportRepos :
         ICrudRepos<ErrorReport, string>
     {
-        Task<bool> AnyActive(string resourceId);
+        Task<IEnumerable<ErrorReport>> ReadAllActiveOnResource(string resourceId);
     }
 }

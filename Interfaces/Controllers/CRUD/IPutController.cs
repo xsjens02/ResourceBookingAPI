@@ -2,8 +2,8 @@
 
 namespace ResourceBookingAPI.Interfaces.Controllers.CRUD
 {
-    public interface IReadAllController
+    public interface IPutController<T, TKey>
     {
-        Task<IActionResult> GetAll([FromQuery] string id);
+        Task<IActionResult> Put(TKey id, [FromBody] T entity);
     }
 }

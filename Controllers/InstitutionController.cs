@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ResourceBookingAPI.Interfaces.Controllers;
-using ResourceBookingAPI.Interfaces.Repositories;
+using ResourceBookingAPI.Interfaces.Managers;
 using ResourceBookingAPI.Models;
 
 namespace ResourceBookingAPI.Controllers
@@ -16,15 +16,15 @@ namespace ResourceBookingAPI.Controllers
     //[Authorize(Roles = "admin")]
     public class InstitutionController : ControllerBase, IInstitutionController
     {
-        private readonly IInstitutionRepos _institutionRepo;
+        private readonly IInstitutionManager _institutionManager;
 
         /// <summary>
-        /// Initializes the InstitutionController with the repository for institution management.
+        /// Initializes the InstitutionController with the manager for institution management.
         /// </summary>
-        /// <param name="institutionRepo">The repository used for managing institutions.</param>
-        public InstitutionController(IInstitutionRepos institutionRepo)
+        /// <param name="institutionRepo">The manager used for managing institutions.</param>
+        public InstitutionController(IInstitutionManager institutionManager)
         {
-            _institutionRepo = institutionRepo;
+            this._institutionManager = institutionManager;
         }
 
         /// <summary>
@@ -33,14 +33,14 @@ namespace ResourceBookingAPI.Controllers
         /// <param name="entity">The institution entity to create.</param>
         /// <returns>An IActionResult indicating the result of the create operation.</returns>
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Institution entity)
+        public async Task<IActionResult> Post([FromBody] Institution entity)
         {
             if (entity == null)
                 return BadRequest("Institution entity cannot be null");
 
             try
             {
-                await _institutionRepo.Create(entity);
+                await _institutionManager.Create(entity);
                 return CreatedAtAction(nameof(Get), new { id = entity.Id }, entity);
             }
             catch (Exception ex)
@@ -60,7 +60,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
 
-            var institution = await _institutionRepo.Get(id);
+            var institution = await _institutionManager.Get(id);
             if (institution == null)
                 return NotFound($"No institution found with Id:{id}");
 
@@ -74,7 +74,7 @@ namespace ResourceBookingAPI.Controllers
         /// <param name="entity">The updated institution entity.</param>
         /// <returns>An IActionResult indicating the result of the update operation.</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] Institution entity)
+        public async Task<IActionResult> Put(string id, [FromBody] Institution entity)
         {
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
@@ -82,7 +82,7 @@ namespace ResourceBookingAPI.Controllers
             if (entity == null)
                 return BadRequest("Institution entity cannot be null");
 
-            var succes = await _institutionRepo.Update(id, entity);
+            var succes = await _institutionManager.Update(id, entity);
             if (succes)
                 return NoContent();
 

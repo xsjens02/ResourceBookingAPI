@@ -2,7 +2,7 @@
 
 namespace ResourceBookingAPI.Interfaces.Controllers.CRUD
 {
-    public interface IReadController<TKey>
+    public interface IGetController<TKey>
     {
         Task<IActionResult> Get(TKey id);
     }

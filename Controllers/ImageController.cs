@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ResourceBookingAPI.Interfaces.Controllers;
+using ResourceBookingAPI.Interfaces.Managers;
 using ResourceBookingAPI.Interfaces.Services;
 
 namespace ResourceBookingAPI.Controllers
@@ -14,14 +15,14 @@ namespace ResourceBookingAPI.Controllers
     [Authorize(Roles = "admin")]
     public class ImageController : ControllerBase, IImageController
     {
-        private readonly ICdnService _cdnService;
+        private readonly IImageManager _imageManager;
 
         /// <summary>
-        /// Initializes the ImageController with the CDN service for managing images.
+        /// Initializes the ImageController with the CDN manager for managing images.
         /// </summary>
-        /// <param name="cdnService">The service used for image uploads and deletions.</param>
-        public ImageController(ICdnService cdnService) =>
-            _cdnService = cdnService;
+        /// <param name="cdnService">The manager used for image uploads and deletions.</param>
+        public ImageController(IImageManager imageManager) =>
+            _imageManager = imageManager;
 
         /// <summary>
         /// Uploads an image file to the CDN.
@@ -34,7 +35,7 @@ namespace ResourceBookingAPI.Controllers
             if (file == null)
                 return BadRequest("No file provided");
 
-            var result = await _cdnService.Upload(file);
+            var result = await _imageManager.UploadImage(file);
             if (result == null)
                 return BadRequest("File upload failed");
 
@@ -52,7 +53,7 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrEmpty(filePath))
                 return BadRequest("Url cannot be null or empty");
 
-            var result = await _cdnService.Delete(filePath);
+            var result = await _imageManager.DeleteImage(filePath);
             if (result)
                 return Ok();
 

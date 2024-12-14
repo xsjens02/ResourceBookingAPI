@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace ResourceBookingAPI.Interfaces.Repositories.CRUD
+﻿namespace ResourceBookingAPI.Interfaces.Repositories.CRUD
 {
-    public interface IReadAllRepos<T>
+    public interface IReadAllRepos<T, TKey>
     {
-        Task<IEnumerable<T>> GetAll([FromQuery] string id);
+        Task<IEnumerable<T>> ReadAll(TKey id);
     }
 }
