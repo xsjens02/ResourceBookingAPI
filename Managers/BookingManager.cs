@@ -26,6 +26,29 @@ namespace ResourceBookingAPI.Managers
         }
 
         /// <summary>
+        /// Clears all upcoming bookings for a specified institution starting from the current date.
+        /// </summary>
+        /// <param name="institutionId">The unique identifier of the institution whose bookings should be cleared.</param>
+        /// <returns>A task representing the asynchronous operation, returning true if bookings were successfully cleared, false otherwise.</returns>
+        public async Task<bool> ClearUpcomingInstitutionBookings(string institutionId)
+        {
+            var currentDate = DateTime.UtcNow;
+            return await _bookingRepo.DeleteOnInstitutionByDate(institutionId, currentDate);
+        }
+
+
+        /// <summary>
+        /// Clears all upcoming bookings for a specified resource starting from the current date.
+        /// </summary>
+        /// <param name="resourceId">The unique identifier of the resource whose bookings should be cleared.</param>
+        /// <returns>A task representing the asynchronous operation, returning true if bookings were successfully cleared, false otherwise.</returns>
+        public async Task<bool> ClearUpcomingResourceBookings(string resourceId)
+        {
+            var currentDate = DateTime.UtcNow;
+            return await _bookingRepo.DeleteOnResourceByDate(resourceId, currentDate);
+        }
+
+        /// <summary>
         /// Creates a new booking in the system.
         /// </summary>
         /// <param name="entity">The booking entity to create.</param>

@@ -140,5 +140,39 @@ namespace ResourceBookingAPI.Repositories.Mongo
             var result = await _bookings.DeleteOneAsync(filter);
             return result.DeletedCount > 0;
         }
+
+        /// <summary>
+        /// Deletes all bookings for a specific resource from the specified date onwards.
+        /// </summary>
+        /// <param name="resourceId">The unique identifier of the resource.</param>
+        /// <param name="date">The start date from which bookings will be deleted.</param>
+        /// <returns>A boolean indicating whether the operation was successful.</returns>
+        public async Task<bool> DeleteOnResourceByDate(string resourceId, DateTime date)
+        {
+            var filter = Builders<Booking>.Filter.And(
+                Builders<Booking>.Filter.Eq(b => b.ResourceId, resourceId),
+                Builders<Booking>.Filter.Gte(b => b.Date, date)
+            );
+
+            var result = await _bookings.DeleteManyAsync(filter);
+            return result.DeletedCount > 0;
+        }
+
+        /// <summary>
+        /// Deletes all bookings for a specific institution from the specified date onwards.
+        /// </summary>
+        /// <param name="institutionId">The unique identifier of the institution.</param>
+        /// <param name="date">The start date from which bookings will be deleted.</param>
+        /// <returns>A boolean indicating whether the operation was successful.</returns>
+        public async Task<bool> DeleteOnInstitutionByDate(string institutionId, DateTime date)
+        {
+            var filter = Builders<Booking>.Filter.And(
+                Builders<Booking>.Filter.Eq(b => b.InstitutionId, institutionId),
+                Builders<Booking>.Filter.Gte(b => b.Date, date)
+            );
+
+            var result = await _bookings.DeleteManyAsync(filter);
+            return result.DeletedCount > 0;
+        }
     }
 }

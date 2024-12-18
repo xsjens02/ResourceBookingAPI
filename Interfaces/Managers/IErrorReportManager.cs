@@ -7,5 +7,6 @@ namespace ResourceBookingAPI.Interfaces.Managers
         ICrudManager<ErrorReport, string>
     {
         Task<bool> AnyActiveOnResource(string resourceId);
+        Task<bool> ClearUnresolvedOnResource(string resourceId);
     }
 }

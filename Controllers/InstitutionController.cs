@@ -17,14 +17,17 @@ namespace ResourceBookingAPI.Controllers
     public class InstitutionController : ControllerBase, IInstitutionController
     {
         private readonly IInstitutionManager _institutionManager;
+        private readonly IBookingManager _bookingManager;
 
         /// <summary>
-        /// Initializes the InstitutionController with the manager for institution management.
+        /// Initializes the InstitutionController with managers for managing institution related operations.
         /// </summary>
         /// <param name="institutionRepo">The manager used for managing institutions.</param>
-        public InstitutionController(IInstitutionManager institutionManager)
+        /// <param name="bookingManager">The manager used for managing bookings</param>
+        public InstitutionController(IInstitutionManager institutionManager, IBookingManager bookingManager)
         {
             this._institutionManager = institutionManager;
+            _bookingManager = bookingManager;
         }
 
         /// <summary>
@@ -82,6 +85,7 @@ namespace ResourceBookingAPI.Controllers
             if (entity == null)
                 return BadRequest("Institution entity cannot be null");
 
+            await _bookingManager.ClearUpcomingInstitutionBookings(id);
             var succes = await _institutionManager.Update(id, entity);
             if (succes)
                 return NoContent();

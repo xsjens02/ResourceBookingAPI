@@ -7,5 +7,6 @@ namespace ResourceBookingAPI.Interfaces.Repositories
         ICrudRepos<ErrorReport, string>
     {
         Task<IEnumerable<ErrorReport>> ReadAllActiveOnResource(string resourceId);
+        Task<bool> ResolveOnResource(string resourceId);
     }
 }

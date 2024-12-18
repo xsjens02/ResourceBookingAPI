@@ -9,5 +9,7 @@ namespace ResourceBookingAPI.Interfaces.Managers
         Task<IEnumerable<Booking>> GetStatistics(string institutionId, DateTime startDate, DateTime endDate);
         Task<IEnumerable<Booking>> GetPendingUserBookings(string userId, DateTime currentDate);
         Task<IEnumerable<Booking>> GetResourceBookingsOnDate(string resourceId, DateTime searchDate);
+        Task<bool> ClearUpcomingResourceBookings(string resourceId);
+        Task<bool> ClearUpcomingInstitutionBookings(string institutionId);
     }
 }

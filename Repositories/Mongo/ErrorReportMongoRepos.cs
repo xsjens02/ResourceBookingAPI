@@ -98,5 +98,19 @@ namespace ResourceBookingAPI.Repositories.Mongo
         {
             return await _errorReports.Find(e => e.ResourceId == resourceId && !e.Resolved).ToListAsync();
         }
+
+        /// <summary>
+        /// Marks all unresolved error reports for a specific resource as resolved.
+        /// </summary>
+        /// <param name="resourceId">The unique identifier of the resource whose error reports to resolve.</param>
+        /// <returns>A boolean indicating whether any reports were successfully resolved.</returns>
+        public async Task<bool> ResolveOnResource(string resourceId)
+        {
+            var filter = Builders<ErrorReport>.Filter.Where(e => e.ResourceId == resourceId && !e.Resolved);
+            var update = Builders<ErrorReport>.Update.Set(e => e.Resolved, true);
+
+            var result = await _errorReports.UpdateManyAsync(filter, update);
+            return result.ModifiedCount > 0;
+        }
     }
 }

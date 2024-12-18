@@ -9,5 +9,7 @@ namespace ResourceBookingAPI.Interfaces.Repositories
         Task<IEnumerable<Booking>> GetOnInstitutionByDateRange(string institutionId, DateTime startDate, DateTime endDate);
         Task<IEnumerable<Booking>> GetOnUserByDate(string userId, DateTime currentDate);
         Task<IEnumerable<Booking>> GetOnResourceByDate(string resourceId, DateTime searchDate);
+        Task<bool> DeleteOnResourceByDate(string resourceId, DateTime date);
+        Task<bool> DeleteOnInstitutionByDate(string institutionId, DateTime date);
     }
 }

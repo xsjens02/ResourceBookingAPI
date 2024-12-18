@@ -16,14 +16,20 @@ namespace ResourceBookingAPI.Controllers
     public class ResourceController : ControllerBase, IResourceController
     {
         private readonly IResourceManager _resourceManager;
+        private readonly IBookingManager _bookingManager;
+        private readonly IErrorReportManager _errorReportManager;
 
         /// <summary>
-        /// Initializes the ResourceController with the resource manager for managing resources.
+        /// Initializes the ResourceController with managers for managing resource related operations.
         /// </summary>
-        /// <param name="resourceRepo">The manager used for CRUD operations on resources.</param>
-        public ResourceController(IResourceManager resourceManager)
+        /// <param name="resourceRepo">The manager used for managing on resources.</param>
+        /// <param name="bookingManager">The manager used for managing on bookings</param>
+        /// <param name="errorReportManager">The manager used for managing on error reports</param>
+        public ResourceController(IResourceManager resourceManager, IBookingManager bookingManager, IErrorReportManager errorReportManager)
         {
             this._resourceManager = resourceManager;
+            this._bookingManager = bookingManager;
+            _errorReportManager = errorReportManager;
         }
 
         /// <summary>
@@ -106,7 +112,8 @@ namespace ResourceBookingAPI.Controllers
         }
 
         /// <summary>
-        /// Deletes a resource by its ID.
+        /// Deletes a resource by its ID and performs cleanup operations such as
+        /// clearing upcoming bookings and unresolved error reports to resource.
         /// </summary>
         /// <param name="id">The ID of the resource to delete.</param>
         /// <returns>An IActionResult indicating the result of the delete operation.</returns>
@@ -117,6 +124,8 @@ namespace ResourceBookingAPI.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Id cannot be null or empty");
 
+            await _bookingManager.ClearUpcomingResourceBookings(id);
+            await _errorReportManager.ClearUnresolvedOnResource(id);
             var succes = await _resourceManager.Delete(id);
             if (succes)
                 return NoContent();

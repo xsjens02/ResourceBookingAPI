@@ -37,6 +37,16 @@ namespace ResourceBookingAPI.Managers
         }
 
         /// <summary>
+        /// Clears all unresolved error reports for a specific resource by marking them as resolved.
+        /// </summary>
+        /// <param name="resourceId">The unique identifier of the resource.</param>
+        /// <returns>A boolean indicating whether any error reports were successfully resolved.</returns>
+        public async Task<bool> ClearUnresolvedOnResource(string resourceId)
+        {
+            return await _errorReportRepo.ResolveOnResource(resourceId);
+        }
+
+        /// <summary>
         /// Creates a new error report in the system.
         /// </summary>
         /// <param name="entity">The error report entity to create.</param>
